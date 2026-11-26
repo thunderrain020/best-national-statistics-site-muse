@@ -115,4 +115,18 @@ document.getElementById('menu-btn').addEventListener('click', () => {
   document.getElementById('menu-btn').setAttribute('aria-expanded', String(open));
 });
 
+// Dark / light theme. The inline script in index.html already applied the
+// saved theme before first paint; here we sync the button and wire clicks.
+const themeBtn = document.getElementById('theme-toggle');
+const applyTheme = (t) => {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('lionstat-theme', t); } catch (e) {}
+  themeBtn.setAttribute('aria-pressed', String(t === 'dark'));
+  themeBtn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+};
+applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+themeBtn.addEventListener('click', () => {
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+
 route();

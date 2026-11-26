@@ -1,7 +1,7 @@
 // LionStat — Data Explorer (#/explorer): search, filter and download the
-// full 2015–2024 series behind every indicator as real CSV or JSON.
+// full 2010–2024 series behind every indicator as real CSV or JSON.
 
-import { INDICATORS, TOPICS, indicatorById } from '../data/indicators.js';
+import { INDICATORS, TOPICS, indicatorById, stampFor } from '../data/indicators.js';
 import { sourceById } from '../data/sources.js';
 import { cite, sectionHead } from './common.js';
 
@@ -26,7 +26,7 @@ export function render() {
   const topicOptions = TOPICS.map((t) => `<option value="${t.id}">${t.name}</option>`).join('');
   return `
   <section class="explorer-page">
-    ${sectionHead('Data Explorer', 'Every number, downloadable', 'All 23 indicators, every year 2015–2024 — 230 observations. Filter it, sort it, take it with you as CSV or JSON.')}
+    ${sectionHead('Data Explorer', 'Every number, downloadable', 'All 30 indicators, every year 2010–2024 — 450 observations. Filter it, sort it, take it with you as CSV or JSON.')}
     <div class="explorer-controls">
       <label class="grow">Search
         <input id="ex-search" type="search" placeholder="Try “GDP”, “unemployment”, “TEU”…" autocomplete="off">
@@ -35,10 +35,10 @@ export function render() {
         <select id="ex-topic"><option value="">All topics</option>${topicOptions}</select>
       </label>
       <label>From year
-        <select id="ex-from">${[2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2015 ? ' selected' : ''}>${y}</option>`).join('')}</select>
+        <select id="ex-from">${[2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2010 ? ' selected' : ''}>${y}</option>`).join('')}</select>
       </label>
       <label>To year
-        <select id="ex-to">${[2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2024 ? ' selected' : ''}>${y}</option>`).join('')}</select>
+        <select id="ex-to">${[2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2024 ? ' selected' : ''}>${y}</option>`).join('')}</select>
       </label>
     </div>
     <div class="explorer-actions">
@@ -85,7 +85,7 @@ export function mount() {
       if (q && !`${ind.title} ${ind.unit} ${ind.topic}`.toLowerCase().includes(q)) continue;
       for (const p of ind.series) {
         if (p.year < from || p.year > to) continue;
-        out.push({ id: ind.id, title: ind.title, topic: ind.topic, year: p.year, value: p.value, unit: ind.unit, sourceId: ind.sourceId });
+        out.push({ id: ind.id, title: ind.title, topic: ind.topic, year: p.year, value: p.value, unit: ind.unit, sourceId: ind.sourceId, stamp: stampFor(ind) });
       }
     }
     out.sort((a, b) => {
@@ -105,7 +105,7 @@ export function mount() {
       .map((r) => `<tr>
         <td>${r.title}</td><td>${topicName(r.topic)}</td>
         <td class="num">${r.year}</td><td class="num">${r.value.toLocaleString('en-SG')}</td>
-        <td>${r.unit}</td><td>${cite(r.sourceId)}</td>
+        <td>${r.unit}</td><td>${r.stamp} ${cite(r.sourceId)}</td>
       </tr>`).join('');
     count.textContent = `${list.length} observations`;
   };

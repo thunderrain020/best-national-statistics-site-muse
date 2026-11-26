@@ -39,10 +39,10 @@ export function render() {
         <div class="panel">
           <h3 class="subhead">Methodology</h3>
           <ul class="method-list">
-            <li><strong>Reference years.</strong> Every figure is labelled with its year. Annual series run 2015–2024, the latest year fully published across these releases.</li>
+            <li><strong>Reference years.</strong> Every figure is labelled with its year. Annual series run 2010–2024, the latest year fully published across these releases.</li>
             <li><strong>No estimates.</strong> Where a release had not yet published a 2024 figure, the series stops at 2023 and the indicator says so. Nothing is interpolated.</li>
             <li><strong>Derived figures.</strong> Density is population divided by area; GDP per capita is nominal GDP divided by total population. Both are checked live in the audit panel.</li>
-            <li><strong>Planning areas.</strong> The 28 areas are the largest and most populous of the URA’s 55 planning areas, mapped on a tile grid so small dense areas stay readable.</li>
+            <li><strong>Planning areas.</strong> The 28 areas are the largest and most populous of the URA’s 55 planning areas, mapped at their real geographic positions over the island’s coastline, so small dense areas stay readable.</li>
             <li><strong>Rounding.</strong> Shares are shown to one decimal place; underlying values are kept at full precision and the audit checks the unrounded sums.</li>
           </ul>
         </div>

@@ -1,28 +1,37 @@
-// LionStat — Overview (#/): headline KPIs, featured chart switcher,
-// topic cards, a regional highlight and the latest-release strip.
+// LionStat — Overview (#/): a command centre that fits 1280×800 above
+// the fold: a compact masthead, the geographic map with latest releases
+// on the left, six KPI cards and the featured chart on the right. Topic
+// cards and the regional summary sit below the fold.
 
 import { PYRAMID_2024, indicatorById } from '../data/indicators.js';
-import { AREAS, REGIONS } from '../data/regions.js';
+import { AREAS, REGIONS, areaById } from '../data/regions.js';
 import { RELEASE_CALENDAR } from '../data/sources.js';
-import { renderLineChart, renderPyramidChart } from '../charts.js';
-import { cite, kpiCard, sectionHead } from './common.js';
+import { renderLineChart, renderPyramidChart, renderRegionMap } from '../charts.js';
+import { kpiCard, sectionHead } from './common.js';
 
 const FEATURED = [
-  { id: 'gdp', label: 'GDP & Growth 2015–2025' },
-  { id: 'population', label: 'Population & Ageing' },
-  { id: 'inflation', label: 'Inflation: CPI vs Core' },
-  { id: 'trade', label: 'Trade & Port TEUs' },
+  { id: 'gdp', label: 'GDP Growth' },
+  { id: 'population', label: 'Population' },
+  { id: 'inflation', label: 'Core vs Headline CPI' },
+  { id: 'trade', label: 'Port TEUs' },
+];
+
+const MAP_METRICS = [
+  { id: 'population', label: 'Population' },
+  { id: 'density', label: 'Density' },
+  { id: 'medianAge', label: 'Median Age' },
+  { id: 'hdbShare', label: 'HDB Share' },
 ];
 
 export function render() {
   const kpis = [
-    'total-population',
-    'nominal-gdp',
-    'real-gdp-growth',
-    'resident-unemployment',
-    'cpi-core',
-    'home-ownership',
-  ].map((id) => kpiCard(indicatorById(id))).join('');
+    ['total-population', 'Population'],
+    ['nominal-gdp', 'Nominal GDP'],
+    ['real-gdp-growth', 'Real GDP Growth'],
+    ['resident-unemployment', 'Resident Unemployment'],
+    ['cpi-core', 'Core Inflation'],
+    ['home-ownership', 'Home Ownership'],
+  ].map(([id, short]) => kpiCard(indicatorById(id), true, short)).join('');
 
   const topicCards = [
     { id: 'demography', name: 'Demography', figure: '6.04M people', note: 'Median age 43.0 years, fertility 0.97' },
@@ -51,36 +60,46 @@ export function render() {
 
   const releases = RELEASE_CALENDAR.slice(0, 3)
     .map(
-      (r) => `<li><strong>${r.release}</strong><span>${r.agency} · ${r.window}</span></li>`,
+      (r) => `<li><strong>${r.release}</strong><span> — ${r.agency} · ${r.window}</span></li>`,
     )
     .join('');
 
   return `
-  <section class="hero">
+  <section class="masthead">
     <p class="kicker">Independent civic statistical atlas · Republic of Singapore</p>
     <h1>Singapore in numbers.</h1>
-    <p class="hero-blurb">Every headline figure about the country — population, economy, jobs,
-    prices, trade and housing — from the official releases, checked for
-    consistency, and shown with its source and year. No estimates, no
-    placeholders, nothing behind a login.</p>
-    <div class="hero-facts">
-      <span><strong>23</strong> indicators</span>
-      <span><strong>28</strong> planning areas</span>
-      <span><strong>20</strong> numbered sources</span>
-      <span><strong>2015–2024</strong> series</span>
-    </div>
+    <p class="masthead-facts">30 indicators · 28 planning areas · 20 official citations · 2010–2024 series</p>
+    <p class="masthead-sub">Every headline figure from the official releases, checked for consistency, with its source and year.</p>
   </section>
 
-  <section class="kpi-grid" aria-label="Headline indicators">${kpis}</section>
-
-  <section class="featured">
-    ${sectionHead('Featured chart', 'The economy, the people, the prices', 'Switch the chart to compare the four stories that define Singapore in 2024.')}
-    <div class="switcher" role="tablist" aria-label="Featured chart">
-      ${FEATURED.map((f, i) => `<button type="button" role="tab" class="switcher-btn${i === 0 ? ' active' : ''}" data-chart="${f.id}" aria-selected="${i === 0}">${f.label}</button>`).join('')}
+  <div class="command-grid">
+    <div class="cc-left">
+      <section class="panel cc-map-panel" aria-label="Singapore map">
+        <div class="cc-panel-head"><h2>Singapore, area by area</h2><a href="#/regions">Full map →</a></div>
+        <div class="map-controls" id="cc-map-controls" role="group" aria-label="Map metric">
+          ${MAP_METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${m.label}</button>`).join('')}
+        </div>
+        <div id="cc-map"></div>
+        <div id="cc-selected" class="cc-selected" aria-live="polite"></div>
+      </section>
+      <section class="panel cc-releases" aria-label="Latest official releases">
+        <div class="cc-panel-head"><h2>Latest official releases</h2><a href="#/sources">Calendar →</a></div>
+        <ul class="release-list compact">${releases}</ul>
+      </section>
     </div>
-    <div id="featured-chart" class="chart-panel"></div>
-    <div id="featured-extra" class="chart-panel"></div>
-  </section>
+
+    <div class="cc-right">
+      <section class="kpi-grid kpi-grid-compact" aria-label="Headline indicators">${kpis}</section>
+      <section class="panel featured-panel" aria-label="Featured chart">
+        <div class="cc-panel-head"><h2>Featured trend</h2><a href="#/explorer">Data Explorer →</a></div>
+        <div class="switcher" role="tablist" aria-label="Featured chart">
+          ${FEATURED.map((f, i) => `<button type="button" role="tab" class="switcher-btn${i === 0 ? ' active' : ''}" data-chart="${f.id}" aria-selected="${i === 0}">${f.label}</button>`).join('')}
+        </div>
+        <div id="featured-chart" class="cc-chart"></div>
+        <div id="featured-extra" class="cc-chart"></div>
+      </section>
+    </div>
+  </div>
 
   <section class="topics-section">
     ${sectionHead('Browse by topic', 'Six topics, one atlas', 'Each topic carries its own charts, a full indicator table and a source for every figure.')}
@@ -97,15 +116,44 @@ export function render() {
       <p><a class="btn" href="#/regions">Open the interactive map →</a></p>
     </div>
     <div class="panel">
-      ${sectionHead('Latest releases', 'Fresh from the agencies', 'The next scheduled official releases behind these figures.')}
-      <ul class="release-list">${releases}</ul>
-      <p class="panel-note">Dataset vintage: latest verified figures 2024 ${cite(15)}. See the full calendar and the audit on the Sources page.</p>
-      <p><a class="btn btn-ghost" href="#/sources">Sources &amp; calendar →</a></p>
+      ${sectionHead('Method', 'Every figure, sourced and checked', 'No estimates, no placeholders, nothing behind a login.')}
+      <p class="panel-note">Thirty indicators across six topics, each with a 2010–2024 series and a numbered official citation. A live audit on the Sources page checks the dataset for consistency — sector shares, age bands, GDP per capita, population parts — and reports every result.</p>
+      <p><a class="btn btn-ghost" href="#/sources">Sources, calendar &amp; audit →</a></p>
     </div>
   </section>`;
 }
 
 export function mount() {
+  // Interactive map in the left column.
+  let mapMetric = 'population';
+  let selectedArea = window.__lionstatSelectedArea || 'bedok';
+  window.__lionstatSelectedArea = undefined;
+  const mapHost = document.getElementById('cc-map');
+  const selectedHost = document.getElementById('cc-selected');
+  const drawSelected = () => {
+    const a = areaById(selectedArea);
+    selectedHost.innerHTML = `<strong>${a.name}</strong> · ${(a.population / 1000).toFixed(0)}k people · ${a.areaKm2} km² · age ${a.medianAge.toFixed(1)} · HDB ${a.hdbSharePct}% · <a href="#/regions">Open regions →</a>`;
+  };
+  const drawMap = () => {
+    renderRegionMap(mapHost, AREAS, REGIONS, selectedArea, mapMetric, (id) => {
+      selectedArea = id;
+      drawSelected();
+      drawMap();
+    });
+  };
+  drawSelected();
+  drawMap();
+  document.querySelectorAll('#cc-map-controls .metric-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#cc-map-controls .metric-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      mapMetric = btn.dataset.metric;
+      drawSelected();
+      drawMap();
+    });
+  });
+
+  // Featured chart switcher.
   const featured = document.getElementById('featured-chart');
   const extra = document.getElementById('featured-extra');
   const draw = (id) => {
@@ -113,23 +161,23 @@ export function mount() {
     if (id === 'gdp') {
       renderLineChart(featured, [
         { label: 'Nominal GDP (S$B)', color: '#0F766E', values: indicatorById('nominal-gdp').series },
-      ], { title: 'Nominal GDP, 2015–2024', unit: 'S$B', caption: 'Nominal GDP rose 6.8% in 2024 to S$719.4B [2]. Real growth was +4.4%, up from +1.8% in 2023 [2].' });
+      ], { title: '', unit: 'S$B', compact: true, caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].' });
     } else if (id === 'population') {
       renderLineChart(featured, [
         { label: 'Total population (M)', color: '#0F766E', values: indicatorById('total-population').series },
         { label: 'Resident population (M)', color: '#B45309', values: indicatorById('resident-population').series },
-      ], { title: 'Population, 2015–2024', unit: 'M', caption: 'Total population 6.04M at June 2024; residents 4.18M [1]. The 2021 dip is the pandemic outflow.' });
+      ], { title: '', unit: 'M', compact: true, caption: 'Total 6.04M; residents 4.18M at June 2024 [1].' });
       renderPyramidChart(extra, PYRAMID_2024, { title: 'Age structure, 2024 — share of total population', caption: 'Working-age residents (15–64) are 72.3% of the population; seniors 65+ are 13.6% [1].' });
     } else if (id === 'inflation') {
       renderLineChart(featured, [
         { label: 'Headline CPI (% YoY)', color: '#BE123C', values: indicatorById('cpi-headline').series },
         { label: 'MAS core inflation (% YoY)', color: '#0F766E', values: indicatorById('cpi-core').series },
-      ], { title: 'Inflation, 2015–2024', unit: '% YoY', caption: 'Headline CPI +2.4% and core +2.7% in 2024, both down sharply from 2023 [4] [5].' });
+      ], { title: '', unit: '% YoY', compact: true, caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].' });
     } else {
       renderLineChart(featured, [
         { label: 'Container throughput (M TEUs)', color: '#0F766E', values: indicatorById('container-throughput').series },
         { label: 'Changi passengers (M)', color: '#B45309', values: indicatorById('changi-passengers').series },
-      ], { title: 'Port & airport, 2015–2024', unit: 'million', caption: 'A record 41.1M TEUs through the port [7]; Changi handled 67.7M passengers, near its 2019 record [8].' });
+      ], { title: '', unit: 'million', compact: true, caption: 'Record 41.1M TEUs [7]; Changi 67.7M passengers [8].' });
     }
   };
   draw('gdp');

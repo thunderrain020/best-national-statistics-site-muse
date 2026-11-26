@@ -1,4 +1,4 @@
-// LionStat — Regions (#/regions): interactive tile-grid map, area detail
+// LionStat — Regions (#/regions): interactive geographic map, area detail
 // panel, two-area comparison, and a sortable, filterable table.
 
 import { AREAS, REGIONS, areaById, regionById } from '../data/regions.js';

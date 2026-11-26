@@ -1,5 +1,6 @@
 // LionStat — shared view helpers: citation chips, KPI cards, tables.
 
+import { stampFor } from '../data/indicators.js';
 import { renderSparkline } from '../charts.js';
 
 export function cite(sourceId) {
@@ -13,14 +14,14 @@ export function deltaBadge(ind) {
   return `<span class="delta ${cls}">${ind.yoyLabel}</span>`;
 }
 
-export function kpiCard(ind) {
+export function kpiCard(ind, compact = false, titleOverride = null) {
   const values = ind.series.map((p) => p.value);
   const trendColor = ind.yoyDelta >= 0 ? '#0F766E' : '#BE123C';
-  return `<article class="kpi-card">
-    <div class="kpi-top"><h3>${ind.title}</h3>${cite(ind.sourceId)}</div>
+  return `<article class="kpi-card${compact ? ' compact' : ''}">
+    <div class="kpi-top"><h3>${titleOverride ?? ind.title}</h3>${cite(ind.sourceId)}</div>
     <div class="kpi-value">${ind.display}</div>
     <div class="kpi-meta"><span class="kpi-unit">${ind.unit} · ${ind.latestYear}</span>${deltaBadge(ind)}</div>
-    <div class="kpi-spark">${renderSparkline(values, trendColor)}</div>
+    <div class="kpi-foot"><span class="kpi-stamp">${stampFor(ind)}</span><span class="kpi-spark">${renderSparkline(values, trendColor)}</span></div>
   </article>`;
 }
 
@@ -33,7 +34,7 @@ export function indicatorTable(indicators) {
         <td class="num">${i.yoyLabel}</td>
         <td>${i.unit}</td>
         <td class="num">${i.latestYear}</td>
-        <td>${cite(i.sourceId)}</td>
+        <td>${stampFor(i)} ${cite(i.sourceId)}</td>
       </tr>`,
     )
     .join('');

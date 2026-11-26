@@ -76,11 +76,11 @@ export function renderSparkline(values, color) {
 
 export function renderLineChart(container, seriesList, options = {}) {
   const W = 640;
-  const H = 300;
+  const H = options.compact ? 150 : 300;
   const padL = 56;
   const padR = 16;
   const padT = 14;
-  const padB = 34;
+  const padB = options.compact ? 28 : 34;
   const all = seriesList.flatMap((s) => s.values.map((p) => p.value));
   let min = Math.min(...all);
   let max = Math.max(...all);
@@ -93,12 +93,20 @@ export function renderLineChart(container, seriesList, options = {}) {
   const x = (i) => padL + (i / (years.length - 1)) * (W - padL - padR);
   const y = (v) => padT + (1 - (v - min) / (max - min)) * (H - padT - padB);
   const format = options.format || fmtNum;
+  // Axis labels stay readable: integers for large values, one decimal
+  // for tens, two decimals only for small values. Tooltips keep fmtNum.
+  const gridFormat = (v) => {
+    const a = Math.abs(v);
+    if (a >= 100) return Math.round(v).toLocaleString('en-SG');
+    if (a >= 10) return (Math.round(v * 10) / 10).toFixed(1);
+    return fmtNum(v);
+  };
 
   let grid = '';
   for (let g = 0; g <= 4; g++) {
     const v = min + ((max - min) * g) / 4;
     const yy = y(v);
-    grid += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W - padR}" y2="${yy.toFixed(1)}" class="grid-line"/><text x="${padL - 8}" y="${(yy + 4).toFixed(1)}" class="axis-label" text-anchor="end">${esc(format(v))}</text>`;
+    grid += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W - padR}" y2="${yy.toFixed(1)}" class="grid-line"/><text x="${padL - 8}" y="${(yy + 4).toFixed(1)}" class="axis-label" text-anchor="end">${esc(gridFormat(v))}</text>`;
   }
   let xLabels = '';
   years.forEach((yr, i) => {
@@ -196,15 +204,13 @@ export function renderPyramidChart(container, bands, options = {}) {
     ${options.caption ? `<p class="chart-caption">${esc(options.caption)}</p>` : ''}`;
 }
 
-// Tile-grid map of Singapore: one tile per planning area, placed by
-// geography. metric: 'population' | 'density' | 'medianAge' | 'hdbShare'.
+// Geographic tile map of Singapore: one tile per planning area, centred
+// at its real geographic position over a simplified coastline silhouette
+// (mainland plus Sentosa, Jurong Island, Pulau Ubin and Pulau Tekong).
+// metric: 'population' | 'density' | 'medianAge' | 'hdbShare'.
 export function renderRegionMap(container, areas, regions, selectedId, metric, onSelect) {
-  const COLS = 9;
-  const ROWS = 6;
-  const TILE = 92;
-  const GAP = 8;
-  const W = COLS * (TILE + GAP) + GAP;
-  const H = ROWS * (TILE + GAP) + GAP + 8;
+  const TILE_W = 80;
+  const TILE_H = 56;
   const metricOf = (a) =>
     metric === 'population' ? a.population
     : metric === 'density' ? a.densityPerKm2
@@ -235,32 +241,53 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
     if (best[0].length > 11) best = [words[0], words.slice(1).join(' ')];
     return best;
   };
+  const valText = (a) => {
+    const val = metricOf(a);
+    return metric === 'population' ? `${(val / 1000).toFixed(0)}k` : metric === 'medianAge' ? val.toFixed(1) : val.toLocaleString('en-SG');
+  };
+  // Simplified coastline silhouette of Singapore. Coordinates are in the
+  // same 1000×620 viewBox as the tiles: the mainland runs roughly 50 km
+  // east–west, so the 88-unit scale bar below is about 5 km.
+  const coastline = `
+    <path class="landmass" d="M 95,520 L 70,440 L 60,360 L 80,300 L 130,240 L 210,180 L 290,150 L 370,135 L 450,130 L 540,125 L 620,130 L 690,140 L 760,155 L 830,180 L 890,230 L 925,280 L 905,350 L 880,410 L 840,450 L 780,480 L 710,505 L 650,520 L 590,515 L 520,510 L 450,505 L 380,505 L 320,510 L 210,525 L 140,530 Z"/>
+    <path class="landmass" d="M 600,545 L 660,540 L 690,552 L 660,568 L 610,566 Z"/>
+    <path class="landmass" d="M 120,545 L 200,540 L 260,548 L 280,568 L 230,585 L 150,580 L 110,565 Z"/>
+    <path class="landmass" d="M 700,95 L 770,88 L 800,100 L 780,118 L 720,118 L 695,105 Z"/>
+    <path class="landmass" d="M 830,105 L 890,100 L 910,118 L 880,135 L 840,130 Z"/>
+    <text x="748" y="106" class="map-island-label" text-anchor="middle">Pulau Ubin</text>
+    <text x="872" y="120" class="map-island-label" text-anchor="middle">Pulau Tekong</text>
+    <text x="195" y="568" class="map-island-label" text-anchor="middle">Jurong Island</text>
+    <text x="645" y="558" class="map-island-label" text-anchor="middle">Sentosa</text>
+    <text x="500" y="46" class="map-water-label" text-anchor="middle">Strait of Johor</text>
+    <text x="500" y="585" class="map-water-label" text-anchor="middle">Singapore Strait</text>
+    <g class="map-compass"><polygon points="945,48 939,68 951,68" fill="#0F172A"/><text x="945" y="84" class="map-compass-n" text-anchor="middle">N</text></g>
+    <g class="map-scale"><line x1="800" y1="576" x2="888" y2="576" stroke="#0F172A" stroke-width="2"/><line x1="800" y1="571" x2="800" y2="581" stroke="#0F172A" stroke-width="2"/><line x1="888" y1="571" x2="888" y2="581" stroke="#0F172A" stroke-width="2"/><text x="844" y="566" class="map-scale-label" text-anchor="middle">5 km</text></g>`;
   let tiles = '';
   areas.forEach((a) => {
     const t = (metricOf(a) - lo) / span;
-    const x = GAP + a.col * (TILE + GAP);
-    const y = GAP + a.row * (TILE + GAP);
+    const x = a.x - TILE_W / 2;
+    const y = a.y - TILE_H / 2;
     const sel = a.id === selectedId;
-    const val = metricOf(a);
-    const valText = metric === 'population' ? `${(val / 1000).toFixed(0)}k` : metric === 'medianAge' ? val.toFixed(1) : val.toLocaleString('en-SG');
     const lines = nameLines(a.name);
     const two = lines.length === 2;
     const nameText = lines
-      .map((ln, i) => `<text x="${x + TILE / 2}" y="${y + (two ? 30 + i * 15 : 34)}" class="map-tile-name" fill="${textOn(t)}">${esc(ln)}</text>`)
+      .map((ln, i) => `<text x="${a.x}" y="${y + (two ? 19 + i * 13 : 24)}" class="map-tile-name" fill="${textOn(t)}">${esc(ln)}</text>`)
       .join('');
-    tiles += `<g class="map-tile${sel ? ' selected' : ''}" data-area="${esc(a.id)}" tabindex="0" role="button" aria-label="${esc(a.name)}: ${esc(metricLabel)} ${esc(valText)}">
-      <rect x="${x}" y="${y}" width="${TILE}" height="${TILE}" rx="8" fill="${ramp(t)}" stroke="${sel ? '#0F172A' : '#FFFFFF'}" stroke-width="${sel ? 3 : 1.5}"/>
+    tiles += `<g class="map-tile${sel ? ' selected' : ''}" data-area="${esc(a.id)}" tabindex="0" role="button" aria-label="${esc(a.name)}: ${esc(metricLabel)} ${esc(valText(a))}">
+      <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="8" fill="${ramp(t)}" stroke="${sel ? '#0F172A' : '#FFFFFF'}" stroke-width="${sel ? 3 : 1.5}"/>
       ${nameText}
-      <text x="${x + TILE / 2}" y="${y + (two ? 64 : 56)}" class="map-tile-value" fill="${textOn(t)}">${esc(valText)}</text>
-      <text x="${x + TILE / 2}" y="${y + (two ? 79 : 74)}" class="map-tile-sub" fill="${textOn(t)}">${esc(metricLabel)}</text>
+      <text x="${a.x}" y="${y + (two ? 47 : 42)}" class="map-tile-value" fill="${textOn(t)}">${esc(valText(a))}</text>
     </g>`;
   });
   const regionChips = regions
     .map((r) => `<span class="region-chip"><span class="legend-swatch" style="background:${r.color}"></span>${esc(r.name)}</span>`)
     .join('');
+  const highest = areas.reduce((b, a) => (metricOf(a) > metricOf(b) ? a : b), areas[0]);
+  const lowest = areas.reduce((b, a) => (metricOf(a) < metricOf(b) ? a : b), areas[0]);
   container.innerHTML = `
-    <div class="chart-wrap map-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tile-grid map of Singapore planning areas">${tiles}</svg></div>
+    <div class="chart-wrap map-wrap"><svg viewBox="0 30 1000 560" role="img" aria-label="Geographic map of Singapore planning areas">${coastline}${tiles}</svg></div>
     <div class="map-legend"><span class="map-legend-label">${esc(metricLabel)}: ${esc(metric === 'population' ? `${(lo / 1000).toFixed(0)}k` : String(lo))} — ${esc(metric === 'population' ? `${(hi / 1000).toFixed(0)}k` : String(hi))}</span><span class="map-ramp"><span style="background:#DCEFEA"></span><span style="background:#9CCDC6"></span><span style="background:#4FA79E"></span><span style="background:#0F766E"></span></span></div>
+    <div class="map-hilo"><span class="hilo-chip hilo-high">Highest: ${esc(highest.name)} — ${esc(valText(highest))}</span><span class="hilo-chip hilo-low">Lowest: ${esc(lowest.name)} — ${esc(valText(lowest))}</span></div>
     <div class="region-chips">${regionChips}</div>`;
   container.querySelectorAll('.map-tile').forEach((g) => {
     const pick = () => onSelect(g.dataset.area);
