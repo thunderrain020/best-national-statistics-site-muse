@@ -20,7 +20,24 @@ const COMPARE_METRICS = [
   { id: 'population', label: 'Population', fmt: (v) => `${(v / 1000).toFixed(0)}k` },
   { id: 'densityPerKm2', label: 'Density / km²', fmt: (v) => v.toLocaleString('en-SG') },
   { id: 'medianAge', label: 'Median age', fmt: (v) => v.toFixed(1) },
+  { id: 'hdbSharePct', label: 'HDB share', fmt: (v) => `${v}%` },
 ];
+
+// Rank helper: position of an area among the 28 by a metric, highest first
+// (so median age ranks the oldest area #1, matching the table's desc sort).
+const METRIC_VALUES = {
+  population: (a) => a.population,
+  density: (a) => a.densityPerKm2,
+  medianAge: (a) => a.medianAge,
+  hdbShare: (a) => a.hdbSharePct,
+};
+const METRIC_LABELS = {
+  population: 'Population', density: 'Density', medianAge: 'Median age', hdbShare: 'HDB share',
+};
+function rankOf(area, metric) {
+  const value = METRIC_VALUES[metric](area);
+  return 1 + AREAS.filter((a) => METRIC_VALUES[metric](a) > value).length;
+}
 
 export function render() {
   const options = AREAS.map((a) => `<option value="${a.id}">${a.name}</option>`).join('');
@@ -72,8 +89,9 @@ export function render() {
   </section>`;
 }
 
-function detailHtml(area) {
+function detailHtml(area, metric = 'population') {
   const region = regionById(area.region);
+  const rank = rankOf(area, metric);
   return `
     <p class="kicker crumb"><span>Singapore</span> <span class="crumb-sep">›</span> <button type="button" class="crumb-btn" data-region="${area.region}">${region.name}</button></p>
     <h3>${area.name}</h3>
@@ -86,8 +104,10 @@ function detailHtml(area) {
       <div><dt>Aged 65+</dt><dd>${area.seniorPct.toFixed(1)}%</dd></div>
       <div><dt>HDB share</dt><dd>${area.hdbSharePct}%</dd></div>
       <div><dt>MRT stations</dt><dd>${area.mrtStations}</dd></div>
+      <div><dt>Rank · ${METRIC_LABELS[metric]}</dt><dd>#${rank} of 28</dd></div>
     </dl>
     <p class="panel-note">Known for: ${area.topFeatures.join(' · ')}. Sources [1] [14].</p>
+    <p class="panel-note prov-note">SingStat Population Trends · Jun 2024 · Primary · Boundaries: URA Master Plan 2019 · Verified</p>
     <div class="detail-actions">
       <button type="button" class="btn btn-mini" data-dl-csv>Download CSV</button>
       <button type="button" class="btn btn-ghost btn-mini" data-copy-cite>Copy citation</button>
@@ -165,14 +185,14 @@ export function mount() {
   const drawMap = () => {
     renderRegionMap(mapHost, AREAS, REGIONS, selectedId, metric, (id) => {
       selectedId = id;
-      detailHost.innerHTML = detailHtml(areaById(id));
+      detailHost.innerHTML = detailHtml(areaById(id), metric);
       wireDetailActions(areaById(id), filterToRegion);
       drawMap();
     }, { compact: true });
   };
   const selectArea = (id) => {
     selectedId = id;
-    detailHost.innerHTML = detailHtml(areaById(id));
+    detailHost.innerHTML = detailHtml(areaById(id), metric);
     wireDetailActions(areaById(id), filterToRegion);
     drawMap();
   };
@@ -181,7 +201,7 @@ export function mount() {
     drawTable();
     document.querySelector('.table-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
-  detailHost.innerHTML = detailHtml(areaById(selectedId));
+  detailHost.innerHTML = detailHtml(areaById(selectedId), metric);
   wireDetailActions(areaById(selectedId), filterToRegion);
   drawMap();
   document.querySelectorAll('.metric-btn').forEach((btn) => {
@@ -189,6 +209,8 @@ export function mount() {
       document.querySelectorAll('.metric-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       metric = btn.dataset.metric;
+      detailHost.innerHTML = detailHtml(areaById(selectedId), metric);
+      wireDetailActions(areaById(selectedId), filterToRegion);
       drawMap();
     });
   });
@@ -239,13 +261,17 @@ export function mount() {
       .map((a, i) => `<tr>
         <td class="num rank">${i + 1}</td>
         <td><button type="button" class="link-btn" data-area="${a.id}">${a.name}</button></td>
-        <td>${regionById(a.region).name.replace(' Region', '')}</td>
+        <td><span class="region-pill"><span class="region-dot" style="background:${regionById(a.region).color}"></span>${regionById(a.region).name.replace(' Region', '')}</span></td>
         <td class="num">${a.population.toLocaleString('en-SG')}</td>
         <td class="num">${a.densityPerKm2.toLocaleString('en-SG')}</td>
         <td class="num">${a.medianAge.toFixed(1)}</td>
         <td class="num">${a.hdbSharePct}%</td>
       </tr>`).join('');
     count.textContent = `${rows.length} of 28 areas shown`;
+    document.querySelectorAll('#areas-table th[data-sort]').forEach((th) => {
+      th.classList.toggle('sorted', th.dataset.sort === sortKey);
+      th.classList.toggle('asc', th.dataset.sort === sortKey && sortDir === 1);
+    });
     body.querySelectorAll('.link-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         selectArea(btn.dataset.area);

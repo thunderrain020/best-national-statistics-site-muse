@@ -3,7 +3,7 @@
 // on the left, six KPI cards and the featured chart on the right. Topic
 // cards and the regional summary sit below the fold.
 
-import { PYRAMID_2024, indicatorById } from '../data/indicators.js';
+import { PYRAMID_2024, indicatorById, verifyDataConsistency } from '../data/indicators.js';
 import { AREAS, REGIONS, areaById } from '../data/regions.js';
 import { RELEASE_CALENDAR } from '../data/sources.js';
 import { renderLineChart, renderPyramidChart, renderRegionMap } from '../charts.js';
@@ -25,6 +25,9 @@ const MAP_METRICS = [
 ];
 
 export function render() {
+  const auditResult = verifyDataConsistency();
+  const auditPassed = auditResult.checks.filter((c) => c.pass).length;
+  const auditTotal = auditResult.checks.length;
   const kpis = [
     ['total-population', 'kpi.population'],
     ['nominal-gdp', 'kpi.gdp'],
@@ -86,7 +89,7 @@ export function render() {
         <div id="cc-selected" class="cc-selected" aria-live="polite"></div>
       </section>
       <section class="panel cc-releases" aria-label="Latest official releases">
-        <div class="cc-panel-head"><h2>${t('ov.releases.title')}</h2><a href="#/sources">${t('ov.releases.cal')}</a></div>
+        <div class="cc-panel-head"><h2>${t('ov.releases.title')}</h2><span class="releases-head-links"><a class="audit-pill" href="#/sources" title="Data integrity audit — see Sources &amp; Calendar">${auditPassed}/${auditTotal} ${t('ov.audit')}</a><a href="#/sources">${t('ov.releases.cal')}</a></span></div>
         <ul class="release-list compact">${releases}</ul>
       </section>
     </div>

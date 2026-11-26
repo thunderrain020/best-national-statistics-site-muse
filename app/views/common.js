@@ -1,6 +1,6 @@
 // LionStat — shared view helpers: citation chips, KPI cards, tables.
 
-import { stampFor } from '../data/indicators.js';
+import { publisherFor, refDateFor, sourceStatusFor, stampFor } from '../data/indicators.js';
 import { renderSparkline } from '../charts.js';
 import { t } from '../i18n.js';
 
@@ -36,6 +36,12 @@ export function kpiCard(ind, compact = false, titleOverride = null) {
   </article>`;
 }
 
+// V5: the Source & Status column carries publisher + exact reference
+// date + secondary verification on every row (e.g. 'SingStat · Jun 2024
+// · WB ✓'), so provenance is visible without opening the bibliography.
+// The year lives inside the reference date, so the separate Year column
+// is dropped; the table ID still shows on every KPI card and in the
+// Data Explorer.
 export function indicatorTable(indicators) {
   const rows = indicators
     .map(
@@ -44,13 +50,12 @@ export function indicatorTable(indicators) {
         <td class="num">${i.display}</td>
         <td class="num">${i.yoyLabel}</td>
         <td>${i.unit}</td>
-        <td class="num">${i.latestYear}</td>
-        <td>${i.tableId} ${cite(i.sourceId)}</td>
+        <td class="source-cell">${publisherFor(i)} · ${refDateFor(i)} · ${sourceStatusFor(i)} ${cite(i.sourceId)}</td>
       </tr>`,
     )
     .join('');
   return `<div class="table-scroll"><table class="data-table">
-    <thead><tr><th>${t('table.indicator')}</th><th class="num">${t('table.latest')}</th><th class="num">${t('table.change')}</th><th>${t('table.unit')}</th><th class="num">${t('table.year')}</th><th>${t('table.source')}</th></tr></thead>
+    <thead><tr><th>${t('table.indicator')}</th><th class="num">${t('table.latest')}</th><th class="num">${t('table.change')}</th><th>${t('table.unit')}</th><th>${t('table.sourceStatus')}</th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
