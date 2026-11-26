@@ -91,7 +91,7 @@ export function render() {
     <div class="cc-right">
       <section class="kpi-grid kpi-grid-compact" aria-label="Headline indicators">${kpis}</section>
       <section class="panel featured-panel" aria-label="Featured chart">
-        <div class="cc-panel-head"><h2>Featured trend</h2><a href="#/explorer">Data Explorer →</a></div>
+        <div class="cc-panel-head"><h2>Featured trend</h2><div class="cc-head-actions"><button type="button" class="btn-mini" id="dl-featured-csv">Download CSV</button><button type="button" class="btn-mini" id="copy-featured-cite">Copy citation</button><a href="#/explorer">Data Explorer →</a></div></div>
         <div class="switcher" role="tablist" aria-label="Featured chart">
           ${FEATURED.map((f, i) => `<button type="button" role="tab" class="switcher-btn${i === 0 ? ' active' : ''}" data-chart="${f.id}" aria-selected="${i === 0}">${f.label}</button>`).join('')}
         </div>
@@ -156,24 +156,29 @@ export function mount() {
   // Featured chart switcher.
   const featured = document.getElementById('featured-chart');
   const extra = document.getElementById('featured-extra');
+  let currentFeatured = null;
   const draw = (id) => {
     extra.innerHTML = '';
     if (id === 'gdp') {
+      currentFeatured = { label: 'GDP Growth', caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].', indicators: ['nominal-gdp'] };
       renderLineChart(featured, [
         { label: 'Nominal GDP (S$B)', color: '#0F766E', values: indicatorById('nominal-gdp').series },
       ], { title: '', unit: 'S$B', compact: true, caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].' });
     } else if (id === 'population') {
+      currentFeatured = { label: 'Population', caption: 'Total 6.04M; residents 4.18M at June 2024 [1].', indicators: ['total-population', 'resident-population'] };
       renderLineChart(featured, [
         { label: 'Total population (M)', color: '#0F766E', values: indicatorById('total-population').series },
         { label: 'Resident population (M)', color: '#B45309', values: indicatorById('resident-population').series },
       ], { title: '', unit: 'M', compact: true, caption: 'Total 6.04M; residents 4.18M at June 2024 [1].' });
       renderPyramidChart(extra, PYRAMID_2024, { title: 'Age structure, 2024 — share of total population', caption: 'Working-age residents (15–64) are 72.3% of the population; seniors 65+ are 13.6% [1].' });
     } else if (id === 'inflation') {
+      currentFeatured = { label: 'Core vs Headline CPI', caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].', indicators: ['cpi-headline', 'cpi-core'] };
       renderLineChart(featured, [
         { label: 'Headline CPI (% YoY)', color: '#BE123C', values: indicatorById('cpi-headline').series },
         { label: 'MAS core inflation (% YoY)', color: '#0F766E', values: indicatorById('cpi-core').series },
       ], { title: '', unit: '% YoY', compact: true, caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].' });
     } else {
+      currentFeatured = { label: 'Port TEUs', caption: 'Record 41.1M TEUs [7]; Changi 67.7M passengers [8].', indicators: ['container-throughput', 'changi-passengers'] };
       renderLineChart(featured, [
         { label: 'Container throughput (M TEUs)', color: '#0F766E', values: indicatorById('container-throughput').series },
         { label: 'Changi passengers (M)', color: '#B45309', values: indicatorById('changi-passengers').series },
@@ -191,5 +196,48 @@ export function mount() {
       btn.setAttribute('aria-selected', 'true');
       draw(btn.dataset.chart);
     });
+  });
+
+  // Export the featured chart: CSV of its series, and a copyable citation.
+  const flash = (btn, text) => {
+    const old = btn.textContent;
+    btn.textContent = text;
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  };
+  const download = (filename, text, type) => {
+    const blob = new Blob([text], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const csvCell = (v) => {
+    const s = String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  document.getElementById('dl-featured-csv').addEventListener('click', (ev) => {
+    const lines = [['indicator', 'year', 'value', 'unit', 'source_id'].join(',')];
+    for (const id of currentFeatured.indicators) {
+      const ind = indicatorById(id);
+      for (const p of ind.series) {
+        lines.push([ind.title, p.year, p.value, ind.unit, ind.sourceId].map(csvCell).join(','));
+      }
+    }
+    download(`lionstat-${currentFeatured.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-2010-2024.csv`, lines.join('\r\n'), 'text/csv');
+    flash(ev.currentTarget, 'Saved ✓');
+  });
+  document.getElementById('copy-featured-cite').addEventListener('click', async (ev) => {
+    const btn = ev.currentTarget;
+    const text = `LionStat — Singapore in Numbers: ${currentFeatured.label} — ${currentFeatured.caption}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      flash(btn, 'Copied ✓');
+    } catch {
+      btn.textContent = text;
+    }
   });
 }

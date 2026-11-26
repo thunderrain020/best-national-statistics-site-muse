@@ -387,6 +387,11 @@ button.legend-item:hover { border-color: var(--jade); }
 .cc-panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
 .cc-panel-head h2 { font-size: 17px; letter-spacing: -0.01em; }
 .cc-panel-head a { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.cc-head-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.btn-mini { border: 1px solid var(--border); background: var(--surface); color: var(--jade-dark); border-radius: 7px; padding: 5px 9px; font-size: 12.5px; font-weight: 700; white-space: nowrap; line-height: 1.3; }
+.btn-mini:hover { border-color: var(--jade); color: var(--ink); }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.copy-note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 6px; min-height: 0; }
 .cc-selected { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cc-selected strong { color: var(--ink); }
 .release-list.compact { font-size: 14px; }
@@ -489,7 +494,7 @@ html[data-theme="dark"] .landmass { fill: #12312d; stroke: #2dd4bf; }
   .hero h1 { font-size: 32px; }
   .masthead h1 { font-size: 28px; }
   .kpi-grid-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .theme-btn { order: 5; margin-left: auto; }
+  .theme-btn { order: 0; margin-left: 0; padding: 8px 10px; font-size: 12px; }
   .hero-blurb { font-size: 16px; }
   .kpi-grid, .topic-grid { grid-template-columns: 1fr; }
   .kpi-value { font-size: 30px; }

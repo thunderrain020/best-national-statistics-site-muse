@@ -122,7 +122,7 @@ const applyTheme = (t) => {
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem('lionstat-theme', t); } catch (e) {}
   themeBtn.setAttribute('aria-pressed', String(t === 'dark'));
-  themeBtn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  themeBtn.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
 };
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
 themeBtn.addEventListener('click', () => {

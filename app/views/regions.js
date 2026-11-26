@@ -89,7 +89,67 @@ function detailHtml(area) {
       <div><dt>MRT stations</dt><dd>${area.mrtStations}</dd></div>
     </dl>
     <p class="panel-note">Known for: ${area.topFeatures.join(' · ')}.</p>
-    <p class="panel-note">Sources: population and age structure [1]; boundaries and areas [14].</p>`;
+    <p class="panel-note">Sources: population and age structure [1]; boundaries and areas [14].</p>
+    <div class="detail-actions">
+      <button type="button" class="btn btn-mini" data-dl-csv>Download CSV</button>
+      <button type="button" class="btn btn-ghost btn-mini" data-copy-cite>Copy citation</button>
+    </div>
+    <span class="copy-note" data-copy-note aria-live="polite"></span>`;
+}
+
+function areaCsv(area) {
+  const csvCell = (v) => {
+    const s = String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const rows = [
+    ['planning_area', 'region', 'population', 'area_km2', 'density_per_km2', 'median_age', 'youth_pct_0_14', 'senior_pct_65_plus', 'hdb_share_pct', 'mrt_stations'],
+    [area.name, area.region, area.population, area.areaKm2, area.densityPerKm2, area.medianAge, area.youthPct, area.seniorPct, area.hdbSharePct, area.mrtStations],
+  ];
+  return rows.map((r) => r.map(csvCell).join(',')).join('\r\n');
+}
+
+function areaCitation(area) {
+  return `LionStat — Singapore in Numbers: ${area.name} (${regionById(area.region).name}), 2024: population ${area.population.toLocaleString('en-SG')}, density ${area.densityPerKm2.toLocaleString('en-SG')}/km², median age ${area.medianAge.toFixed(1)} years, HDB share ${area.hdbSharePct}%. Sources [1] population and age structure; [14] boundaries and areas.`;
+}
+
+function downloadFile(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function wireDetailActions(area) {
+  const csvBtn = document.querySelector('[data-dl-csv]');
+  const citeBtn = document.querySelector('[data-copy-cite]');
+  const note = document.querySelector('[data-copy-note]');
+  if (!csvBtn || !citeBtn) return;
+  csvBtn.addEventListener('click', (ev) => {
+    const btn = ev.currentTarget;
+    downloadFile(`lionstat-${area.id}-2024.csv`, areaCsv(area), 'text/csv');
+    const old = btn.textContent;
+    btn.textContent = 'Saved ✓';
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  });
+  citeBtn.addEventListener('click', async (ev) => {
+    const btn = ev.currentTarget;
+    const text = areaCitation(area);
+    try {
+      await navigator.clipboard.writeText(text);
+      note.textContent = 'Citation copied.';
+      const old = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => { btn.textContent = old; note.textContent = ''; }, 2500);
+    } catch {
+      note.textContent = text;
+    }
+  });
 }
 
 export function mount() {
@@ -103,15 +163,18 @@ export function mount() {
     renderRegionMap(mapHost, AREAS, REGIONS, selectedId, metric, (id) => {
       selectedId = id;
       detailHost.innerHTML = detailHtml(areaById(id));
+      wireDetailActions(areaById(id));
       drawMap();
     });
   };
   const selectArea = (id) => {
     selectedId = id;
     detailHost.innerHTML = detailHtml(areaById(id));
+    wireDetailActions(areaById(id));
     drawMap();
   };
   detailHost.innerHTML = detailHtml(areaById(selectedId));
+  wireDetailActions(areaById(selectedId));
   drawMap();
   document.querySelectorAll('.metric-btn').forEach((btn) => {
     btn.addEventListener('click', () => {

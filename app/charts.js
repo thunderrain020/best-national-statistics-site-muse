@@ -209,8 +209,8 @@ export function renderPyramidChart(container, bands, options = {}) {
 // (mainland plus Sentosa, Jurong Island, Pulau Ubin and Pulau Tekong).
 // metric: 'population' | 'density' | 'medianAge' | 'hdbShare'.
 export function renderRegionMap(container, areas, regions, selectedId, metric, onSelect) {
-  const TILE_W = 80;
-  const TILE_H = 56;
+  const TILE_W = 84;
+  const TILE_H = 58;
   const metricOf = (a) =>
     metric === 'population' ? a.population
     : metric === 'density' ? a.densityPerKm2
@@ -271,12 +271,12 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
     const lines = nameLines(a.name);
     const two = lines.length === 2;
     const nameText = lines
-      .map((ln, i) => `<text x="${a.x}" y="${y + (two ? 19 + i * 13 : 24)}" class="map-tile-name" fill="${textOn(t)}">${esc(ln)}</text>`)
+      .map((ln, i) => `<text x="${a.x}" y="${y + (two ? 20 + i * 13 : 25)}" class="map-tile-name" fill="${textOn(t)}">${esc(ln)}</text>`)
       .join('');
     tiles += `<g class="map-tile${sel ? ' selected' : ''}" data-area="${esc(a.id)}" tabindex="0" role="button" aria-label="${esc(a.name)}: ${esc(metricLabel)} ${esc(valText(a))}">
-      <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="8" fill="${ramp(t)}" stroke="${sel ? '#0F172A' : '#FFFFFF'}" stroke-width="${sel ? 3 : 1.5}"/>
+      <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="6" fill="${ramp(t)}" stroke="${sel ? '#0F172A' : '#FFFFFF'}" stroke-width="${sel ? 3 : 1.5}"/>
       ${nameText}
-      <text x="${a.x}" y="${y + (two ? 47 : 42)}" class="map-tile-value" fill="${textOn(t)}">${esc(valText(a))}</text>
+      <text x="${a.x}" y="${y + (two ? 49 : 45)}" class="map-tile-value" fill="${textOn(t)}">${esc(valText(a))}</text>
     </g>`;
   });
   const regionChips = regions
