@@ -86,6 +86,15 @@ export function render() {
           ${MAP_METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${t(m.key)}</button>`).join('')}
         </div>
         <div id="cc-map"></div>
+        <div class="region-filter" role="group" aria-label="Filter map by region">
+          <span class="region-filter-label">${t('ov.map.region')}</span>
+          <button type="button" class="region-pill-btn active" data-region="">${t('ov.map.all')}</button>
+          ${REGIONS.map((r) => {
+            const areas = AREAS.filter((a) => a.region === r.id);
+            const pop = areas.reduce((sum, a) => sum + a.population, 0);
+            return `<button type="button" class="region-pill-btn" data-region="${r.id}" title="${r.name} — ${areas.length} areas · ${(pop / 1e6).toFixed(2)}M people"><span class="region-dot" style="background:${r.color}"></span>${r.name.replace(' Region', '')}</button>`;
+          }).join('')}
+        </div>
         <div id="cc-selected" class="cc-selected" aria-live="polite"></div>
       </section>
       <section class="panel cc-releases" aria-label="Latest official releases">
@@ -132,6 +141,7 @@ export function render() {
 export function mount() {
   // Interactive map in the left column.
   let mapMetric = 'population';
+  let mapRegion = null;
   let selectedArea = window.__lionstatSelectedArea || 'bedok';
   window.__lionstatSelectedArea = undefined;
   const mapHost = document.getElementById('cc-map');
@@ -145,7 +155,7 @@ export function mount() {
       selectedArea = id;
       drawSelected();
       drawMap();
-    });
+    }, { region: mapRegion });
   };
   drawSelected();
   drawMap();
@@ -154,6 +164,18 @@ export function mount() {
       document.querySelectorAll('#cc-map-controls .metric-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       mapMetric = btn.dataset.metric;
+      drawSelected();
+      drawMap();
+    });
+  });
+  document.querySelectorAll('.region-pill-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.region-pill-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      mapRegion = btn.dataset.region || null;
+      if (mapRegion) {
+        selectedArea = [...AREAS].filter((a) => a.region === mapRegion).sort((x, y) => y.population - x.population)[0].id;
+      }
       drawSelected();
       drawMap();
     });

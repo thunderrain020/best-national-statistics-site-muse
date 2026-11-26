@@ -252,7 +252,7 @@ button.legend-item:hover { border-color: var(--jade); }
 .release-list span { font-size: 13px; color: var(--muted); }
 
 /* ---------- Map ---------- */
-.map-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.map-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
 .metric-btn {
   border: 1px solid var(--border); background: var(--surface);
   border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 600; color: var(--muted);
@@ -266,7 +266,7 @@ button.legend-item:hover { border-color: var(--jade); }
 .map-tile-name { font-size: 13px; font-weight: 700; text-anchor: middle; font-family: inherit; }
 .map-tile-value { font-size: 16px; font-weight: 800; text-anchor: middle; font-family: inherit; }
 .map-tile-sub { font-size: 10px; text-anchor: middle; font-family: inherit; opacity: 0.75; }
-.map-legend { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; font-size: 13px; color: var(--muted); }
+.map-legend { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; font-size: 13px; color: var(--muted); }
 .map-ramp { display: inline-flex; }
 .map-ramp span { width: 34px; height: 10px; display: block; }
 .map-ramp span:first-child { border-radius: 4px 0 0 4px; }
@@ -478,14 +478,14 @@ html[data-theme="dark"] .region-zone { fill-opacity: 0.12; }
 .topic-demography .panel-note { margin-top: 10px; }
 
 /* ---------- V2: command centre, geographic map, dark theme ---------- */
-.masthead { padding: 0 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-.masthead .kicker { margin-bottom: 4px; }
-.masthead h1 { font-size: 26px; letter-spacing: -0.03em; margin-bottom: 4px; }
+.masthead { padding: 0 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.masthead .kicker { margin-bottom: 2px; }
+.masthead h1 { font-size: 26px; letter-spacing: -0.03em; margin-bottom: 2px; }
 .masthead-facts { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
 .masthead-sub { font-size: 14px; color: var(--muted); margin: 0; max-width: 780px; }
 
-.command-grid { display: grid; grid-template-columns: 44% 56%; gap: 12px; align-items: start; margin-bottom: 30px; }
-.cc-left, .cc-right { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.command-grid { display: grid; grid-template-columns: 44% 56%; gap: 10px; align-items: start; margin-bottom: 30px; }
+.cc-left, .cc-right { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .cc-map-panel, .cc-releases { padding: 8px; }
 .featured-panel { padding: 8px; }
 .cc-panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
@@ -499,10 +499,10 @@ html[data-theme="dark"] .region-zone { fill-opacity: 0.12; }
 .btn-mini:hover { border-color: var(--jade); color: var(--ink); }
 .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .copy-note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 6px; min-height: 0; }
-.cc-selected { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-selected { margin-top: 4px; border-top: 1px solid var(--border); padding-top: 4px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cc-selected strong { color: var(--ink); }
 .release-list.compact { font-size: 14px; }
-.release-list.compact li { padding: 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.release-list.compact li { padding: 3px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cc-releases .release-list { margin-bottom: 0; }
 .release-list.compact strong { display: inline; }
 .release-list.compact span { display: none; }
@@ -535,13 +535,22 @@ html[data-theme="dark"] .region-zone { fill-opacity: 0.12; }
 .map-scale-label { font-size: 11px; fill: var(--ink); font-family: inherit; }
 .map-compass polygon { fill: var(--ink); }
 .map-scale line { stroke: var(--ink); }
-.map-hilo { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.map-hilo { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
 .hilo-chip { font-size: 12.5px; font-weight: 600; border-radius: 999px; padding: 4px 10px; border: 1px solid var(--border); color: var(--muted); }
 .hilo-high { color: var(--jade-dark); background: var(--jade-pale); border-color: transparent; }
 
 /* The overview map hides the region chips (they are on #/regions) so the
    command centre fits 1280×800. */
 .cc-map-panel .region-chips { display: none; }
+/* V6: 2-level Region -> Area filter strip on the cover map. Compact pills
+   (colour dot + short name); the active pill mirrors .metric-btn.active. */
+.region-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.region-filter-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.region-pill-btn { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; font-size: 12px; font-weight: 600; color: var(--ink); background: var(--surface-muted); border: 1px solid var(--border); border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.region-pill-btn:hover { border-color: var(--jade); }
+.region-pill-btn.active { background: var(--jade); border-color: var(--jade); color: #FFFFFF; }
+.region-pill-btn.active .region-dot { outline: 1px solid #FFFFFF; }
+.region-pill-btn .region-dot { width: 8px; height: 8px; }
 
 /* Theme toggle in the header. */
 .theme-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 8px 12px; font-weight: 600; font-size: 13px; color: var(--muted); flex: none; white-space: nowrap; }
@@ -583,6 +592,13 @@ html[data-theme="dark"] .landmass { fill: #12312d; stroke: #2dd4bf; }
   .regions-grid { grid-template-columns: minmax(0, 1fr); }
   .topic-demography-grid { grid-template-columns: minmax(0, 1fr); }
   .command-grid { grid-template-columns: minmax(0, 1fr); }
+  /* V6: flatten the left/right wrappers so the four panels can be
+     re-ordered on narrow screens (map, KPIs, releases, featured). */
+  .cc-left, .cc-right { display: contents; }
+  .cc-map-panel { order: 1; }
+  .kpi-grid-compact { order: 2; }
+  .cc-releases { order: 3; }
+  .featured-panel { order: 4; }
   .area-detail { position: static; }
   .split { grid-template-columns: 1fr; }
   .search-box input { width: 180px; }
@@ -616,6 +632,18 @@ html[data-theme="dark"] .landmass { fill: #12312d; stroke: #2dd4bf; }
   .menu-btn { padding: 6px 10px; font-size: 13px; }
   .hero-blurb { font-size: 16px; }
   .kpi-grid, .topic-grid { grid-template-columns: 1fr; }
+  /* V6: the compact overview grid keeps 2 columns on phones (this rule
+     re-asserts the 2-col layout after the 1fr rule above). */
+  .kpi-grid-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-grid-compact .kpi-value { font-size: 26px; }
+  .masthead-sub { display: none; }
+  .region-filter-label { display: none; }
+  .map-controls .metric-btn { padding: 4px 8px; font-size: 12px; }
+  /* V6: on phones the header search drops to a second row and eats ~56px;
+     hide it (navigation stays in the Menu; desktop search is untouched) so
+     the map + first KPI row reach the fold. */
+  .search-box { display: none; }
+  .map-controls { gap: 6px; }
   .kpi-value { font-size: 30px; }
   .section-head h2 { font-size: 22px; }
   .compare-row { grid-template-columns: 1fr; gap: 4px; }

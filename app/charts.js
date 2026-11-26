@@ -236,6 +236,11 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
     : metric === 'density' ? 'Density / km²'
     : metric === 'medianAge' ? 'Median age'
     : 'HDB share %';
+  // V6: options.region filters the map to one planning region — tiles and
+  // zone hulls outside it dim, and Max/Min read within the region (the
+  // colour ramp stays global so colours stay comparable across regions).
+  const regionFilter = options.region || null;
+  const pool = regionFilter ? areas.filter((a) => a.region === regionFilter) : areas;
   const values = areas.map(metricOf);
   const lo = Math.min(...values);
   const hi = Math.max(...values);
@@ -303,7 +308,8 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
       const d = Math.hypot(dx, dy) || 1;
       return `${(cx + dx * 1.25 + (dx / d) * 34).toFixed(1)},${(cy + dy * 1.25 + (dy / d) * 34).toFixed(1)}`;
     }).join(' ');
-    zones += `<polygon points="${expanded}" class="region-zone" style="fill:${r.color};stroke:${r.color}"><title>${esc(r.name)}</title></polygon>`;
+    const zoneDim = regionFilter && r.id !== regionFilter;
+    zones += `<polygon points="${expanded}" class="region-zone" style="fill:${r.color};stroke:${r.color}" opacity="${zoneDim ? 0.15 : 1}"><title>${esc(r.name)}</title></polygon>`;
   });
 
   let tiles = '';
@@ -317,7 +323,8 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
     const nameText = lines
       .map((ln, i) => `<text x="${a.x}" y="${y + (two ? 20 + i * 13 : 25)}" class="map-tile-name" fill="${textOn(t)}">${esc(ln)}</text>`)
       .join('');
-    tiles += `<g class="map-tile${sel ? ' selected' : ''}" data-area="${esc(a.id)}" tabindex="0" role="button" aria-label="${esc(a.name)}: ${esc(metricLabel)} ${esc(valText(a))}">
+    const dimmed = regionFilter && a.region !== regionFilter;
+    tiles += `<g class="map-tile${sel ? ' selected' : ''}" data-area="${esc(a.id)}" tabindex="0" role="button" aria-label="${esc(a.name)}: ${esc(metricLabel)} ${esc(valText(a))}" opacity="${dimmed ? 0.22 : 1}">
       <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="6" fill="${ramp(t)}" stroke="${sel ? '#0F172A' : '#FFFFFF'}" stroke-width="${sel ? 3 : 1.5}"/>
       ${nameText}
       <text x="${a.x}" y="${y + (two ? 49 : 45)}" class="map-tile-value" fill="${textOn(t)}">${esc(valText(a))}</text>
@@ -326,8 +333,8 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
   const regionChips = regions
     .map((r) => `<span class="region-chip"><span class="legend-swatch" style="background:${r.color}"></span>${esc(r.name)}</span>`)
     .join('');
-  const highest = areas.reduce((b, a) => (metricOf(a) > metricOf(b) ? a : b), areas[0]);
-  const lowest = areas.reduce((b, a) => (metricOf(a) < metricOf(b) ? a : b), areas[0]);
+  const highest = pool.reduce((b, a) => (metricOf(a) > metricOf(b) ? a : b), pool[0]);
+  const lowest = pool.reduce((b, a) => (metricOf(a) < metricOf(b) ? a : b), pool[0]);
   container.innerHTML = `
     <div class="chart-wrap map-wrap"><svg viewBox="0 30 1000 560" role="img" aria-label="Geographic map of Singapore planning areas">${coastline}${zones}${tiles}</svg></div>
     <div class="map-legend"><span class="map-legend-label">${esc(metricLabel)}: ${esc(metric === 'population' ? `${(lo / 1000).toFixed(0)}k` : String(lo))} — ${esc(metric === 'population' ? `${(hi / 1000).toFixed(0)}k` : String(hi))}</span><span class="map-ramp"><span style="background:#DCEFEA"></span><span style="background:#9CCDC6"></span><span style="background:#4FA79E"></span><span style="background:#0F766E"></span></span></div>

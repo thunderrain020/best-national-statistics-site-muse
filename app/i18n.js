@@ -38,6 +38,8 @@ const S = {
   'masthead.sub': ['Every headline figure from the official releases, checked for consistency, with its source and year.', '每项主要数据均来自官方发布，经过一致性核查，并注明来源与年份。'],
   'ov.map.title': ['Singapore, area by area', '新加坡各区一览'],
   'ov.map.full': ['Full map →', '完整地图 →'],
+  'ov.map.region': ['Region', '地区'],
+  'ov.map.all': ['All', '全部'],
   'ov.releases.title': ['Latest official releases', '最新官方发布'],
   'ov.audit': ['audit checks PASS', '核查通过'],
   'ov.releases.cal': ['Calendar →', '日历 →'],

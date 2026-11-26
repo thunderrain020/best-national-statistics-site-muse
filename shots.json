@@ -1,1 +1,34 @@
-[{"file":"1-overview.jpg","path":"#/","viewport":{"height":800,"width":1280}},{"file":"2-regions-map.jpg","path":"#/regions","viewport":{"height":800,"width":1280}},{"file":"3-topics-explorer.jpg","path":"#/topics/demography","viewport":{"height":800,"width":1280}},{"file":"4-mobile.jpg","path":"#/regions","viewport":{"height":844,"width":390}}]
+[
+  {
+    "file": "1-overview.jpg",
+    "path": "#/",
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "2-regions-map.jpg",
+    "path": "#/regions",
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "3-topics-explorer.jpg",
+    "path": "#/topics/demography",
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "4-mobile.jpg",
+    "path": "#/",
+    "viewport": {
+      "height": 844,
+      "width": 390
+    }
+  }
+]
