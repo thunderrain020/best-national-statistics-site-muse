@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="LionStat — Singapore in Numbers. An independent civic statistical atlas: population, economy, jobs, prices, trade and housing, with every figure sourced.">
+<title>Overview — LionStat</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#/">
+      <span class="brand-mark" aria-hidden="true">LS</span>
+      <span class="brand-text"><strong>LionStat</strong><span>Singapore in Numbers</span></span>
+    </a>
+    <button type="button" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary">
+      <a class="nav-link" href="#/">Overview</a>
+      <a class="nav-link" href="#/topics">Topics</a>
+      <a class="nav-link" href="#/regions">Regions</a>
+      <a class="nav-link" href="#/explorer">Data Explorer</a>
+      <a class="nav-link" href="#/sources">Sources &amp; Calendar</a>
+    </nav>
+    <div class="search-box">
+      <label class="sr-only" for="quick-search">Search indicators, topics and planning areas</label>
+      <input id="quick-search" type="search" placeholder="Search indicators, topics, areas…" autocomplete="off">
+      <ul id="search-results" class="search-results" hidden></ul>
+    </div>
+  </div>
+</header>
+<main id="view" class="view"></main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p><strong>LionStat — Singapore in Numbers</strong></p>
+      <p>An independent civic statistical atlas. Not affiliated with the Singapore government or any agency named here.</p>
+    </div>
+    <div>
+      <p><span class="vintage-badge">Latest verified figures: 2024</span></p>
+      <p>100% static · 0 external requests · Works offline</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="#/">Overview</a>
+      <a href="#/topics">Topics</a>
+      <a href="#/regions">Regions</a>
+      <a href="#/explorer">Data Explorer</a>
+      <a href="#/sources">Sources &amp; Calendar</a>
+    </nav>
+  </div>
+</footer>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
