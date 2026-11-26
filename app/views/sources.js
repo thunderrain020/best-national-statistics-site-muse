@@ -5,6 +5,7 @@
 import { RELEASE_CALENDAR, SOURCES } from '../data/sources.js';
 import { verifyDataConsistency } from '../data/indicators.js';
 import { sectionHead } from './common.js';
+import { t } from '../i18n.js';
 
 export function render() {
   const bib = SOURCES.map(
@@ -22,22 +23,21 @@ export function render() {
 
   return `
   <section class="sources-page">
-    ${sectionHead('Sources & Methodology', 'Where every number comes from', 'LionStat republishes official figures; it does not estimate them. Each figure on the site carries a numbered citation that points here.')}
+    ${sectionHead(t('src.kicker'), t('src.title'), t('src.blurb'))}
     <div class="split">
       <div class="panel">
-        <h3 class="subhead">Numbered bibliography</h3>
+        <h3 class="subhead">${t('src.bib.title')}</h3>
         <ol class="bib-list">${bib}</ol>
       </div>
       <div>
         <div class="panel audit-panel">
-          <h3 class="subhead">Data integrity audit — live</h3>
-          <p class="panel-note">This panel runs the site’s own consistency checks in your browser,
-          against the same data files the pages render from. All checks must pass.</p>
+          <h3 class="subhead">${t('src.audit.title')}</h3>
+          <p class="panel-note">${t('src.audit.note')}</p>
           <ul class="audit-list" id="audit-list"></ul>
           <p class="audit-verdict" id="audit-verdict"></p>
         </div>
         <div class="panel">
-          <h3 class="subhead">Methodology</h3>
+          <h3 class="subhead">${t('src.method.title')}</h3>
           <ul class="method-list">
             <li><strong>Reference years.</strong> Every figure is labelled with its year. Annual series run 2010–2024, the latest year fully published across these releases.</li>
             <li><strong>No estimates.</strong> Where a release had not yet published a 2024 figure, the series stops at 2023 and the indicator says so. Nothing is interpolated.</li>
@@ -49,9 +49,9 @@ export function render() {
       </div>
     </div>
     <div class="panel">
-      <h3 class="subhead">Upcoming statistical releases</h3>
+      <h3 class="subhead">${t('src.cal.title')}</h3>
       <div class="table-scroll"><table class="data-table">
-        <thead><tr><th>Quarter</th><th>Release</th><th>Agency</th><th>Window</th></tr></thead>
+        <thead><tr><th>${t('src.cal.quarter')}</th><th>${t('src.cal.release')}</th><th>${t('src.cal.agency')}</th><th>${t('src.cal.window')}</th></tr></thead>
         <tbody>${cal}</tbody>
       </table></div>
     </div>

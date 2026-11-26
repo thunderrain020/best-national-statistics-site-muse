@@ -11,6 +11,7 @@ import * as explorer from './views/explorer.js';
 import * as sources from './views/sources.js';
 import { INDICATORS, TOPICS } from './data/indicators.js';
 import { AREAS } from './data/regions.js';
+import { lang, setLang, t } from './i18n.js';
 
 const view = document.getElementById('view');
 const navLinks = [...document.querySelectorAll('.nav-link')];
@@ -118,15 +119,34 @@ document.getElementById('menu-btn').addEventListener('click', () => {
 // Dark / light theme. The inline script in index.html already applied the
 // saved theme before first paint; here we sync the button and wire clicks.
 const themeBtn = document.getElementById('theme-toggle');
-const applyTheme = (t) => {
-  document.documentElement.dataset.theme = t;
-  try { localStorage.setItem('lionstat-theme', t); } catch (e) {}
-  themeBtn.setAttribute('aria-pressed', String(t === 'dark'));
-  themeBtn.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+const applyTheme = (theme) => {
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('lionstat-theme', theme); } catch (e) {}
+  themeBtn.setAttribute('aria-pressed', String(theme === 'dark'));
+  themeBtn.textContent = theme === 'dark' ? t('theme.light') : t('theme.dark');
 };
 applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
 themeBtn.addEventListener('click', () => {
   applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 });
+
+// EN / ZH language. Static chrome (nav, search, buttons, footer) is
+// updated in place; the current view re-renders from the i18n strings.
+const langBtn = document.getElementById('lang-toggle');
+const applyStaticLang = () => {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => {
+    el.setAttribute('placeholder', t(el.dataset.i18nPh));
+  });
+  langBtn.textContent = lang() === 'zh' ? 'EN' : '中文';
+};
+langBtn.addEventListener('click', () => {
+  setLang(lang() === 'zh' ? 'en' : 'zh');
+  applyStaticLang();
+  route();
+});
+applyStaticLang();
 
 route();

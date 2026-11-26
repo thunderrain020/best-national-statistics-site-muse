@@ -76,7 +76,7 @@ export function renderSparkline(values, color) {
 
 export function renderLineChart(container, seriesList, options = {}) {
   const W = 640;
-  const H = options.compact ? 150 : 300;
+  const H = options.height || (options.compact ? 150 : 300);
   const padL = 56;
   const padR = 16;
   const padT = 14;
@@ -115,6 +115,18 @@ export function renderLineChart(container, seriesList, options = {}) {
     }
   });
 
+  // Inline event callouts: a dashed marker line at the year plus a short
+  // label at the top, staggered across two rows so neighbours never touch.
+  let annotations = '';
+  (options.annotations || []).forEach((ann, ai) => {
+    const i = years.indexOf(ann.year);
+    if (i < 0) return;
+    const ax = x(i);
+    const anchor = ax < W * 0.22 ? 'start' : ax > W * 0.78 ? 'end' : 'middle';
+    const ly = ai % 2 === 0 ? 11 : 24;
+    annotations += `<line x1="${ax.toFixed(1)}" y1="${padT}" x2="${ax.toFixed(1)}" y2="${(H - padB).toFixed(1)}" class="chart-annotation-line"/><text x="${ax.toFixed(1)}" y="${ly}" class="chart-annotation" text-anchor="${anchor}">${esc(ann.text)}</text>`;
+  });
+
   let paths = '';
   const points = [];
   seriesList.forEach((s, si) => {
@@ -139,7 +151,7 @@ export function renderLineChart(container, seriesList, options = {}) {
 
   container.innerHTML = `
     <div class="chart-head">${options.title ? `<h3 class="chart-title">${esc(options.title)}</h3>` : ''}<div class="legend">${legend}</div></div>
-    <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(options.title || 'Line chart')}">${grid}${xLabels}${paths}</svg></div>
+    <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(options.title || 'Line chart')}">${grid}${xLabels}${annotations}${paths}</svg></div>
     ${options.caption ? `<p class="chart-caption">${esc(options.caption)}</p>` : ''}`;
   const svg = container.querySelector('svg');
   attachTooltip(container.querySelector('.chart-wrap'), svg, points);
@@ -181,7 +193,9 @@ export function renderBarChart(container, items, options = {}) {
 
 export function renderPyramidChart(container, bands, options = {}) {
   const W = 640;
-  const rowH = 22;
+  const rowH = options.rowH || 22;
+  const barH = rowH >= 20 ? 15 : 12;
+  const textY = rowH >= 20 ? 13 : 11;
   const H = bands.length * rowH + 52;
   const midX = W / 2;
   const maxV = Math.max(...bands.flatMap((b) => [b.male, b.female]));
@@ -191,11 +205,11 @@ export function renderPyramidChart(container, bands, options = {}) {
     const yTop = 30 + i * rowH;
     const mw = (b.male / maxV) * half;
     const fw = (b.female / maxV) * half;
-    rows += `<text x="${midX}" y="${yTop + 13}" class="axis-label" text-anchor="middle">${esc(b.band)}</text>`;
-    rows += `<rect x="${(midX - 52 - mw).toFixed(1)}" y="${yTop + 2}" width="${mw.toFixed(1)}" height="15" rx="2" fill="#0F766E"><title>Male ${esc(b.band)}: ${b.male}%</title></rect>`;
-    rows += `<rect x="${(midX + 52).toFixed(1)}" y="${yTop + 2}" width="${fw.toFixed(1)}" height="15" rx="2" fill="#B45309"><title>Female ${esc(b.band)}: ${b.female}%</title></rect>`;
-    rows += `<text x="${(midX - 58 - mw).toFixed(1)}" y="${yTop + 14}" class="bar-value" text-anchor="end">${b.male.toFixed(1)}%</text>`;
-    rows += `<text x="${(midX + 58 + fw).toFixed(1)}" y="${yTop + 14}" class="bar-value">${b.female.toFixed(1)}%</text>`;
+    rows += `<text x="${midX}" y="${yTop + textY}" class="axis-label" text-anchor="middle">${esc(b.band)}</text>`;
+    rows += `<rect x="${(midX - 52 - mw).toFixed(1)}" y="${yTop + 2}" width="${mw.toFixed(1)}" height="${barH}" rx="2" fill="#0F766E"><title>Male ${esc(b.band)}: ${b.male}%</title></rect>`;
+    rows += `<rect x="${(midX + 52).toFixed(1)}" y="${yTop + 2}" width="${fw.toFixed(1)}" height="${barH}" rx="2" fill="#B45309"><title>Female ${esc(b.band)}: ${b.female}%</title></rect>`;
+    rows += `<text x="${(midX - 58 - mw).toFixed(1)}" y="${yTop + textY + 1}" class="bar-value" text-anchor="end">${b.male.toFixed(1)}%</text>`;
+    rows += `<text x="${(midX + 58 + fw).toFixed(1)}" y="${yTop + textY + 1}" class="bar-value">${b.female.toFixed(1)}%</text>`;
   });
   container.innerHTML = `
     <div class="chart-head">${options.title ? `<h3 class="chart-title">${esc(options.title)}</h3>` : ''}
@@ -208,7 +222,8 @@ export function renderPyramidChart(container, bands, options = {}) {
 // at its real geographic position over a simplified coastline silhouette
 // (mainland plus Sentosa, Jurong Island, Pulau Ubin and Pulau Tekong).
 // metric: 'population' | 'density' | 'medianAge' | 'hdbShare'.
-export function renderRegionMap(container, areas, regions, selectedId, metric, onSelect) {
+// options.compact hides the region chips row (used on #/regions).
+export function renderRegionMap(container, areas, regions, selectedId, metric, onSelect, options = {}) {
   const TILE_W = 84;
   const TILE_H = 58;
   const metricOf = (a) =>
@@ -262,6 +277,35 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
     <text x="500" y="585" class="map-water-label" text-anchor="middle">Singapore Strait</text>
     <g class="map-compass"><polygon points="945,48 939,68 951,68" fill="#0F172A"/><text x="945" y="84" class="map-compass-n" text-anchor="middle">N</text></g>
     <g class="map-scale"><line x1="800" y1="576" x2="888" y2="576" stroke="#0F172A" stroke-width="2"/><line x1="800" y1="571" x2="800" y2="581" stroke="#0F172A" stroke-width="2"/><line x1="888" y1="571" x2="888" y2="581" stroke="#0F172A" stroke-width="2"/><text x="844" y="566" class="map-scale-label" text-anchor="middle">5 km</text></g>`;
+
+  // Subtle zone tint + boundary per planning region: the convex hull of
+  // the region's tile centres, pushed outward so it wraps the tiles.
+  const hullOf = (pts) => {
+    const sorted = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lower = [];
+    for (const p of sorted) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }
+    const upper = [];
+    for (let i = sorted.length - 1; i >= 0; i--) { const p = sorted[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }
+    lower.pop(); upper.pop();
+    return lower.concat(upper);
+  };
+  let zones = '';
+  regions.forEach((r) => {
+    const pts = areas.filter((a) => a.region === r.id).map((a) => [a.x, a.y]);
+    if (pts.length < 3) return;
+    const hull = hullOf(pts);
+    const cx = hull.reduce((s, p) => s + p[0], 0) / hull.length;
+    const cy = hull.reduce((s, p) => s + p[1], 0) / hull.length;
+    const expanded = hull.map(([px, py]) => {
+      const dx = px - cx;
+      const dy = py - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      return `${(cx + dx * 1.25 + (dx / d) * 34).toFixed(1)},${(cy + dy * 1.25 + (dy / d) * 34).toFixed(1)}`;
+    }).join(' ');
+    zones += `<polygon points="${expanded}" class="region-zone" style="fill:${r.color};stroke:${r.color}"><title>${esc(r.name)}</title></polygon>`;
+  });
+
   let tiles = '';
   areas.forEach((a) => {
     const t = (metricOf(a) - lo) / span;
@@ -285,10 +329,10 @@ export function renderRegionMap(container, areas, regions, selectedId, metric, o
   const highest = areas.reduce((b, a) => (metricOf(a) > metricOf(b) ? a : b), areas[0]);
   const lowest = areas.reduce((b, a) => (metricOf(a) < metricOf(b) ? a : b), areas[0]);
   container.innerHTML = `
-    <div class="chart-wrap map-wrap"><svg viewBox="0 30 1000 560" role="img" aria-label="Geographic map of Singapore planning areas">${coastline}${tiles}</svg></div>
+    <div class="chart-wrap map-wrap"><svg viewBox="0 30 1000 560" role="img" aria-label="Geographic map of Singapore planning areas">${coastline}${zones}${tiles}</svg></div>
     <div class="map-legend"><span class="map-legend-label">${esc(metricLabel)}: ${esc(metric === 'population' ? `${(lo / 1000).toFixed(0)}k` : String(lo))} — ${esc(metric === 'population' ? `${(hi / 1000).toFixed(0)}k` : String(hi))}</span><span class="map-ramp"><span style="background:#DCEFEA"></span><span style="background:#9CCDC6"></span><span style="background:#4FA79E"></span><span style="background:#0F766E"></span></span></div>
-    <div class="map-hilo"><span class="hilo-chip hilo-high">Highest: ${esc(highest.name)} — ${esc(valText(highest))}</span><span class="hilo-chip hilo-low">Lowest: ${esc(lowest.name)} — ${esc(valText(lowest))}</span></div>
-    <div class="region-chips">${regionChips}</div>`;
+    <div class="map-hilo"><span class="hilo-chip hilo-high">Max: ${esc(highest.name)} — ${esc(valText(highest))}</span><span class="hilo-chip hilo-low">Min: ${esc(lowest.name)} — ${esc(valText(lowest))}</span></div>
+    ${options.compact ? '' : `<div class="region-chips">${regionChips}</div>`}`;
   container.querySelectorAll('.map-tile').forEach((g) => {
     const pick = () => onSelect(g.dataset.area);
     g.addEventListener('click', pick);

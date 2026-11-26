@@ -4,6 +4,7 @@
 import { INDICATORS, TOPICS, indicatorById, stampFor } from '../data/indicators.js';
 import { sourceById } from '../data/sources.js';
 import { cite, sectionHead } from './common.js';
+import { t, topicName as topicNameZh } from '../i18n.js';
 
 function csvCell(v) {
   const s = String(v);
@@ -23,39 +24,39 @@ function download(filename, text, type) {
 }
 
 export function render() {
-  const topicOptions = TOPICS.map((t) => `<option value="${t.id}">${t.name}</option>`).join('');
+  const topicOptions = TOPICS.map((t) => `<option value="${t.id}">${topicNameZh(t.id)}</option>`).join('');
   return `
   <section class="explorer-page">
-    ${sectionHead('Data Explorer', 'Every number, downloadable', 'All 30 indicators, every year 2010–2024 — 450 observations. Filter it, sort it, take it with you as CSV or JSON.')}
+    ${sectionHead(t('ex.kicker'), t('ex.title'), t('ex.blurb'))}
     <div class="explorer-controls">
-      <label class="grow">Search
-        <input id="ex-search" type="search" placeholder="Try “GDP”, “unemployment”, “TEU”…" autocomplete="off">
+      <label class="grow">${t('ex.search.label')}
+        <input id="ex-search" type="search" placeholder="${t('ex.search.ph')}" autocomplete="off">
       </label>
-      <label>Topic
-        <select id="ex-topic"><option value="">All topics</option>${topicOptions}</select>
+      <label>${t('ex.topic.label')}
+        <select id="ex-topic"><option value="">${t('ex.all.topics')}</option>${topicOptions}</select>
       </label>
-      <label>From year
+      <label>${t('ex.year.from')}
         <select id="ex-from">${[2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2010 ? ' selected' : ''}>${y}</option>`).join('')}</select>
       </label>
-      <label>To year
+      <label>${t('ex.year.to')}
         <select id="ex-to">${[2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map((y) => `<option${y === 2024 ? ' selected' : ''}>${y}</option>`).join('')}</select>
       </label>
     </div>
     <div class="explorer-actions">
-      <button type="button" class="btn" id="dl-csv">Download CSV</button>
-      <button type="button" class="btn" id="dl-json">Download JSON</button>
-      <button type="button" class="btn btn-ghost" id="copy-cite">Copy citation</button>
+      <button type="button" class="btn" id="dl-csv">${t('ex.csv')}</button>
+      <button type="button" class="btn" id="dl-json">${t('ex.json')}</button>
+      <button type="button" class="btn btn-ghost" id="copy-cite">${t('ex.copy')}</button>
       <span class="table-count" id="ex-count"></span>
       <span class="copy-note" id="copy-note" aria-live="polite"></span>
     </div>
     <div class="table-scroll"><table class="data-table" id="ex-table">
       <thead><tr>
-        <th data-sort="title">Indicator</th>
-        <th data-sort="topic">Topic</th>
-        <th class="num" data-sort="year">Year</th>
-        <th class="num" data-sort="value">Value</th>
-        <th>Unit</th>
-        <th>Source</th>
+        <th data-sort="title">${t('table.indicator')}</th>
+        <th data-sort="topic">${t('ex.table.topic')}</th>
+        <th class="num" data-sort="year">${t('table.year')}</th>
+        <th class="num" data-sort="value">${t('ex.table.value')}</th>
+        <th>${t('table.unit')}</th>
+        <th>${t('table.source')}</th>
       </tr></thead>
       <tbody id="ex-body"></tbody>
     </table></div>
@@ -97,7 +98,7 @@ export function mount() {
     return out;
   };
 
-  const topicName = (id) => TOPICS.find((t) => t.id === id)?.name ?? id;
+  const topicName = (id) => topicNameZh(id);
 
   const draw = () => {
     const list = rows();

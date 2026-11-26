@@ -1,74 +1,73 @@
 // LionStat — Regions (#/regions): interactive geographic map, area detail
 // panel, two-area comparison, and a sortable, filterable table.
+//
+// V4 layout: a tight two-row grid so map + detail + comparison + the top
+// of the ranking table all fit inside a 1280×800 viewport.
 
 import { AREAS, REGIONS, areaById, regionById } from '../data/regions.js';
 import { renderRegionMap } from '../charts.js';
 import { cite, sectionHead } from './common.js';
+import { t } from '../i18n.js';
 
 const METRICS = [
-  { id: 'population', label: 'Population' },
-  { id: 'density', label: 'Density / km²' },
-  { id: 'medianAge', label: 'Median Age' },
-  { id: 'hdbShare', label: 'HDB Share %' },
+  { id: 'population', key: 'regions.metric.population' },
+  { id: 'density', key: 'regions.metric.density' },
+  { id: 'medianAge', key: 'regions.metric.medianAge' },
+  { id: 'hdbShare', key: 'regions.metric.hdbShare' },
 ];
 
 const COMPARE_METRICS = [
   { id: 'population', label: 'Population', fmt: (v) => `${(v / 1000).toFixed(0)}k` },
   { id: 'densityPerKm2', label: 'Density / km²', fmt: (v) => v.toLocaleString('en-SG') },
   { id: 'medianAge', label: 'Median age', fmt: (v) => v.toFixed(1) },
-  { id: 'hdbSharePct', label: 'HDB share', fmt: (v) => `${v}%` },
-  { id: 'youthPct', label: 'Aged 0–14', fmt: (v) => `${v.toFixed(1)}%` },
-  { id: 'seniorPct', label: 'Aged 65+', fmt: (v) => `${v.toFixed(1)}%` },
 ];
 
 export function render() {
   const options = AREAS.map((a) => `<option value="${a.id}">${a.name}</option>`).join('');
   return `
   <section class="regions-page">
-    ${sectionHead('Regions', 'Singapore, area by area', 'Five planning regions, 28 key planning areas. Colour the map by any metric, click a tile to inspect the area, and compare any two areas head to head.')}
+    ${sectionHead(t('regions.kicker'), t('regions.title'), t('regions.intro'))}
     <div class="map-controls" role="group" aria-label="Map metric">
-      ${METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${m.label}</button>`).join('')}
+      ${METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${t(m.key)}</button>`).join('')}
     </div>
-    <div class="map-layout">
+    <div class="regions-grid">
       <div id="region-map" class="chart-panel map-panel"></div>
       <aside id="area-detail" class="area-detail" aria-live="polite"></aside>
-    </div>
 
-    <div class="panel compare-panel">
-      <h3 class="subhead">Compare any two planning areas</h3>
-      <div class="compare-pickers">
-        <label>Area A <select id="compare-a">${options}</select></label>
-        <span class="vs">vs</span>
-        <label>Area B <select id="compare-b">${options}</select></label>
+      <div class="panel compare-panel">
+        <h3 class="subhead">${t('regions.compare.title')}</h3>
+        <div class="compare-pickers">
+          <label>Area A <select id="compare-a">${options}</select></label>
+          <span class="vs">vs</span>
+          <label>Area B <select id="compare-b">${options}</select></label>
+        </div>
+        <div id="compare-result"></div>
       </div>
-      <div id="compare-result"></div>
-    </div>
 
-    <div class="panel">
-      <h3 class="subhead">All 28 planning areas</h3>
-      <div class="table-controls">
-        <label>Region
-          <select id="region-filter">
-            <option value="">All regions</option>
-            ${REGIONS.map((r) => `<option value="${r.id}">${r.name}</option>`).join('')}
-          </select>
-        </label>
-        <span class="table-count" id="area-count"></span>
+      <div class="panel table-panel">
+        <div class="cc-panel-head"><h3 class="subhead">${t('regions.table.title')}</h3><button type="button" class="btn-mini" id="dl-areas-csv">${t('regions.table.csv')}</button></div>
+        <div class="table-controls">
+          <label>Region
+            <select id="region-filter">
+              <option value="">All regions</option>
+              ${REGIONS.map((r) => `<option value="${r.id}">${r.name}</option>`).join('')}
+            </select>
+          </label>
+          <span class="table-count" id="area-count"></span>
+        </div>
+        <div class="table-scroll table-scroll-short"><table class="data-table" id="areas-table">
+          <thead><tr>
+            <th class="num">#</th>
+            <th data-sort="name">Planning area</th>
+            <th data-sort="region">Region</th>
+            <th class="num" data-sort="population">Population</th>
+            <th class="num" data-sort="densityPerKm2">Density / km²</th>
+            <th class="num" data-sort="medianAge">Median age</th>
+            <th class="num" data-sort="hdbSharePct">HDB %</th>
+          </tr></thead>
+          <tbody id="areas-body"></tbody>
+        </table></div>
       </div>
-      <div class="table-scroll"><table class="data-table" id="areas-table">
-        <thead><tr>
-          <th data-sort="name">Planning area</th>
-          <th data-sort="region">Region</th>
-          <th class="num" data-sort="population">Population</th>
-          <th class="num" data-sort="areaKm2">Area km²</th>
-          <th class="num" data-sort="densityPerKm2">Density / km²</th>
-          <th class="num" data-sort="medianAge">Median age</th>
-          <th class="num" data-sort="hdbSharePct">HDB %</th>
-          <th class="num" data-sort="mrtStations">MRT stations</th>
-        </tr></thead>
-        <tbody id="areas-body"></tbody>
-      </table></div>
-      <p class="panel-note">Populations are 2024 planning-area estimates; areas are URA gazetted sizes [14] [1]. Density is population divided by area.</p>
     </div>
   </section>`;
 }
@@ -76,7 +75,7 @@ export function render() {
 function detailHtml(area) {
   const region = regionById(area.region);
   return `
-    <p class="kicker">${region.name}</p>
+    <p class="kicker crumb"><span>Singapore</span> <span class="crumb-sep">›</span> <button type="button" class="crumb-btn" data-region="${area.region}">${region.name}</button></p>
     <h3>${area.name}</h3>
     <dl class="detail-grid">
       <div><dt>Population</dt><dd>${area.population.toLocaleString('en-SG')}</dd></div>
@@ -88,8 +87,7 @@ function detailHtml(area) {
       <div><dt>HDB share</dt><dd>${area.hdbSharePct}%</dd></div>
       <div><dt>MRT stations</dt><dd>${area.mrtStations}</dd></div>
     </dl>
-    <p class="panel-note">Known for: ${area.topFeatures.join(' · ')}.</p>
-    <p class="panel-note">Sources: population and age structure [1]; boundaries and areas [14].</p>
+    <p class="panel-note">Known for: ${area.topFeatures.join(' · ')}. Sources [1] [14].</p>
     <div class="detail-actions">
       <button type="button" class="btn btn-mini" data-dl-csv>Download CSV</button>
       <button type="button" class="btn btn-ghost btn-mini" data-copy-cite>Copy citation</button>
@@ -125,10 +123,14 @@ function downloadFile(filename, text, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function wireDetailActions(area) {
+function wireDetailActions(area, onRegionClick) {
   const csvBtn = document.querySelector('[data-dl-csv]');
   const citeBtn = document.querySelector('[data-copy-cite]');
   const note = document.querySelector('[data-copy-note]');
+  const crumbBtn = document.querySelector('[data-region]');
+  if (crumbBtn && onRegionClick) {
+    crumbBtn.addEventListener('click', () => onRegionClick(area.region));
+  }
   if (!csvBtn || !citeBtn) return;
   csvBtn.addEventListener('click', (ev) => {
     const btn = ev.currentTarget;
@@ -159,22 +161,28 @@ export function mount() {
   window.__lionstatSelectedArea = undefined;
   const mapHost = document.getElementById('region-map');
   const detailHost = document.getElementById('area-detail');
+  const filter = document.getElementById('region-filter');
   const drawMap = () => {
     renderRegionMap(mapHost, AREAS, REGIONS, selectedId, metric, (id) => {
       selectedId = id;
       detailHost.innerHTML = detailHtml(areaById(id));
-      wireDetailActions(areaById(id));
+      wireDetailActions(areaById(id), filterToRegion);
       drawMap();
-    });
+    }, { compact: true });
   };
   const selectArea = (id) => {
     selectedId = id;
     detailHost.innerHTML = detailHtml(areaById(id));
-    wireDetailActions(areaById(id));
+    wireDetailActions(areaById(id), filterToRegion);
     drawMap();
   };
+  const filterToRegion = (regionId) => {
+    filter.value = regionId;
+    drawTable();
+    document.querySelector('.table-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
   detailHost.innerHTML = detailHtml(areaById(selectedId));
-  wireDetailActions(areaById(selectedId));
+  wireDetailActions(areaById(selectedId), filterToRegion);
   drawMap();
   document.querySelectorAll('.metric-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -206,18 +214,18 @@ export function mount() {
         </div>
       </div>`;
     }).join('');
-    result.innerHTML = `<p class="panel-note">${a.name} (${regionById(a.region).name}) vs ${b.name} (${regionById(b.region).name}) — 2024 ${cite(1)}.</p>${rows}`;
+    result.innerHTML = `<p class="panel-note">${a.name} vs ${b.name} — 2024 ${cite(1)}.</p>${rows}`;
   };
   selA.addEventListener('change', drawCompare);
   selB.addEventListener('change', drawCompare);
   drawCompare();
 
-  // Sortable, filterable table.
+  // Sortable, filterable table with a rank column.
   const body = document.getElementById('areas-body');
   const count = document.getElementById('area-count');
-  const filter = document.getElementById('region-filter');
   let sortKey = 'population';
   let sortDir = -1;
+  let shownRows = [];
   const drawTable = () => {
     let rows = AREAS.filter((a) => !filter.value || a.region === filter.value);
     rows = [...rows].sort((x, y) => {
@@ -226,16 +234,16 @@ export function mount() {
       const cmp = typeof vx === 'string' ? vx.localeCompare(vy) : vx - vy;
       return cmp * sortDir;
     });
+    shownRows = rows;
     body.innerHTML = rows
-      .map((a) => `<tr>
+      .map((a, i) => `<tr>
+        <td class="num rank">${i + 1}</td>
         <td><button type="button" class="link-btn" data-area="${a.id}">${a.name}</button></td>
         <td>${regionById(a.region).name.replace(' Region', '')}</td>
         <td class="num">${a.population.toLocaleString('en-SG')}</td>
-        <td class="num">${a.areaKm2.toFixed(1)}</td>
         <td class="num">${a.densityPerKm2.toLocaleString('en-SG')}</td>
         <td class="num">${a.medianAge.toFixed(1)}</td>
         <td class="num">${a.hdbSharePct}%</td>
-        <td class="num">${a.mrtStations}</td>
       </tr>`).join('');
     count.textContent = `${rows.length} of 28 areas shown`;
     body.querySelectorAll('.link-btn').forEach((btn) => {
@@ -255,4 +263,21 @@ export function mount() {
     });
   });
   drawTable();
+
+  document.getElementById('dl-areas-csv').addEventListener('click', (ev) => {
+    const btn = ev.currentTarget;
+    const csvCell = (v) => {
+      const s = String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [['rank', 'planning_area', 'region', 'population', 'area_km2', 'density_per_km2', 'median_age', 'youth_pct_0_14', 'senior_pct_65_plus', 'hdb_share_pct', 'mrt_stations'].join(',')];
+    for (let i = 0; i < shownRows.length; i++) {
+      const a = shownRows[i];
+      lines.push([i + 1, a.name, a.region, a.population, a.areaKm2, a.densityPerKm2, a.medianAge, a.youthPct, a.seniorPct, a.hdbSharePct, a.mrtStations].map(csvCell).join(','));
+    }
+    downloadFile('lionstat-28-planning-areas-2024.csv', lines.join('\r\n'), 'text/csv');
+    const old = btn.textContent;
+    btn.textContent = 'Saved ✓';
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  });
 }

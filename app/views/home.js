@@ -8,43 +8,46 @@ import { AREAS, REGIONS, areaById } from '../data/regions.js';
 import { RELEASE_CALENDAR } from '../data/sources.js';
 import { renderLineChart, renderPyramidChart, renderRegionMap } from '../charts.js';
 import { kpiCard, sectionHead } from './common.js';
+import { t, topicName } from '../i18n.js';
 
 const FEATURED = [
-  { id: 'gdp', label: 'GDP Growth' },
-  { id: 'population', label: 'Population' },
-  { id: 'inflation', label: 'Core vs Headline CPI' },
-  { id: 'trade', label: 'Port TEUs' },
+  { id: 'gdp', key: 'feat.gdp' },
+  { id: 'population', key: 'feat.population' },
+  { id: 'inflation', key: 'feat.inflation' },
+  { id: 'trade', key: 'feat.trade' },
 ];
 
 const MAP_METRICS = [
-  { id: 'population', label: 'Population' },
-  { id: 'density', label: 'Density' },
-  { id: 'medianAge', label: 'Median Age' },
-  { id: 'hdbShare', label: 'HDB Share' },
+  { id: 'population', key: 'regions.metric.population' },
+  { id: 'density', key: 'regions.metric.density' },
+  { id: 'medianAge', key: 'regions.metric.medianAge' },
+  { id: 'hdbShare', key: 'regions.metric.hdbShare' },
 ];
 
 export function render() {
   const kpis = [
-    ['total-population', 'Population'],
-    ['nominal-gdp', 'Nominal GDP'],
-    ['real-gdp-growth', 'Real GDP Growth'],
-    ['resident-unemployment', 'Resident Unemployment'],
-    ['cpi-core', 'Core Inflation'],
-    ['home-ownership', 'Home Ownership'],
-  ].map(([id, short]) => kpiCard(indicatorById(id), true, short)).join('');
+    ['total-population', 'kpi.population'],
+    ['nominal-gdp', 'kpi.gdp'],
+    ['real-gdp-growth', 'kpi.gdpgrowth'],
+    ['resident-unemployment', 'kpi.unemp'],
+    ['cpi-core', 'kpi.cpi'],
+    ['home-ownership', 'kpi.home'],
+    ['median-income', 'kpi.income'],
+    ['total-trade', 'kpi.trade'],
+  ].map(([id, key]) => kpiCard(indicatorById(id), true, t(key))).join('');
 
   const topicCards = [
-    { id: 'demography', name: 'Demography', figure: '6.04M people', note: 'Median age 43.0 years, fertility 0.97' },
-    { id: 'economy', name: 'Economy', figure: 'S$719.4B GDP', note: 'Real growth +4.4% in 2024' },
-    { id: 'labor', name: 'Labor & Wages', figure: 'S$5,500 median pay', note: 'Resident unemployment 2.9%' },
-    { id: 'prices', name: 'Prices & CPI', figure: '+2.4% headline CPI', note: 'Core inflation +2.7%' },
-    { id: 'trade', name: 'Trade & Port', figure: '41.1M TEUs', note: 'Changi handled 67.7M passengers' },
-    { id: 'society', name: 'Society & Housing', figure: '90.8% own homes', note: 'Life expectancy 83.5 years' },
+    { id: 'demography', figure: '6.04M people', note: 'Median age 43.0 years, fertility 0.97' },
+    { id: 'economy', figure: 'S$719.4B GDP', note: 'Real growth +4.4% in 2024' },
+    { id: 'labor', figure: 'S$5,500 median pay', note: 'Resident unemployment 2.9%' },
+    { id: 'prices', figure: '+2.4% headline CPI', note: 'Core inflation +2.7%' },
+    { id: 'trade', figure: '41.1M TEUs', note: 'Changi handled 67.7M passengers' },
+    { id: 'society', figure: '90.8% own homes', note: 'Life expectancy 83.5 years' },
   ]
     .map(
-      (t) => `<a class="topic-card" href="#/topics/${t.id}">
-        <h3>${t.name}</h3><p class="topic-figure">${t.figure}</p><p class="topic-note">${t.note}</p>
-        <span class="topic-link">Explore ${t.name} →</span>
+      (tc) => `<a class="topic-card" href="#/topics/${tc.id}">
+        <h3>${topicName(tc.id)}</h3><p class="topic-figure">${tc.figure}</p><p class="topic-note">${tc.note}</p>
+        <span class="topic-link">${t('topics.explore')} ${topicName(tc.id)} →</span>
       </a>`,
     )
     .join('');
@@ -66,24 +69,24 @@ export function render() {
 
   return `
   <section class="masthead">
-    <p class="kicker">Independent civic statistical atlas · Republic of Singapore</p>
-    <h1>Singapore in numbers.</h1>
-    <p class="masthead-facts">30 indicators · 28 planning areas · 20 official citations · 2010–2024 series</p>
-    <p class="masthead-sub">Every headline figure from the official releases, checked for consistency, with its source and year.</p>
+    <p class="kicker">${t('masthead.kicker')}</p>
+    <h1>${t('masthead.title')}</h1>
+    <p class="masthead-facts">${t('masthead.facts')}</p>
+    <p class="masthead-sub">${t('masthead.sub')}</p>
   </section>
 
   <div class="command-grid">
     <div class="cc-left">
       <section class="panel cc-map-panel" aria-label="Singapore map">
-        <div class="cc-panel-head"><h2>Singapore, area by area</h2><a href="#/regions">Full map →</a></div>
+        <div class="cc-panel-head"><h2>${t('ov.map.title')}</h2><a href="#/regions">${t('ov.map.full')}</a></div>
         <div class="map-controls" id="cc-map-controls" role="group" aria-label="Map metric">
-          ${MAP_METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${m.label}</button>`).join('')}
+          ${MAP_METRICS.map((m, i) => `<button type="button" class="metric-btn${i === 0 ? ' active' : ''}" data-metric="${m.id}">${t(m.key)}</button>`).join('')}
         </div>
         <div id="cc-map"></div>
         <div id="cc-selected" class="cc-selected" aria-live="polite"></div>
       </section>
       <section class="panel cc-releases" aria-label="Latest official releases">
-        <div class="cc-panel-head"><h2>Latest official releases</h2><a href="#/sources">Calendar →</a></div>
+        <div class="cc-panel-head"><h2>${t('ov.releases.title')}</h2><a href="#/sources">${t('ov.releases.cal')}</a></div>
         <ul class="release-list compact">${releases}</ul>
       </section>
     </div>
@@ -91,9 +94,9 @@ export function render() {
     <div class="cc-right">
       <section class="kpi-grid kpi-grid-compact" aria-label="Headline indicators">${kpis}</section>
       <section class="panel featured-panel" aria-label="Featured chart">
-        <div class="cc-panel-head"><h2>Featured trend</h2><div class="cc-head-actions"><button type="button" class="btn-mini" id="dl-featured-csv">Download CSV</button><button type="button" class="btn-mini" id="copy-featured-cite">Copy citation</button><a href="#/explorer">Data Explorer →</a></div></div>
+        <div class="cc-panel-head"><h2>${t('ov.featured.title')}</h2><div class="cc-head-actions"><div class="seg-toggle" role="group" aria-label="Chart units"><button type="button" class="seg-btn active" data-unit="level">${t('unit.level')}</button><button type="button" class="seg-btn" data-unit="yoy">${t('unit.yoy')}</button></div><button type="button" class="btn-mini" id="dl-featured-csv">${t('ov.featured.csv')}</button><button type="button" class="btn-mini" id="copy-featured-cite">${t('ov.featured.cite')}</button><a href="#/explorer">${t('ov.featured.explorer')}</a></div></div>
         <div class="switcher" role="tablist" aria-label="Featured chart">
-          ${FEATURED.map((f, i) => `<button type="button" role="tab" class="switcher-btn${i === 0 ? ' active' : ''}" data-chart="${f.id}" aria-selected="${i === 0}">${f.label}</button>`).join('')}
+          ${FEATURED.map((f, i) => `<button type="button" role="tab" class="switcher-btn${i === 0 ? ' active' : ''}" data-chart="${f.id}" aria-selected="${i === 0}">${t(f.key)}</button>`).join('')}
         </div>
         <div id="featured-chart" class="cc-chart"></div>
         <div id="featured-extra" class="cc-chart"></div>
@@ -102,13 +105,13 @@ export function render() {
   </div>
 
   <section class="topics-section">
-    ${sectionHead('Browse by topic', 'Six topics, one atlas', 'Each topic carries its own charts, a full indicator table and a source for every figure.')}
+    ${sectionHead(t('topics.browse.kicker'), t('topics.browse.title'), t('topics.browse.blurb'))}
     <div class="topic-grid">${topicCards}</div>
   </section>
 
   <section class="split">
     <div class="panel">
-      ${sectionHead('Regions', 'Five regions, 28 planning areas', 'The 28 areas below hold about 3.98 million people. The rest live in the other 27 planning areas.')}
+      ${sectionHead(t('ov.regions.kicker'), t('ov.regions.title'), t('ov.regions.blurb'))}
       <ul class="region-list">${regionRows}</ul>
       <p class="panel-note">Largest area: <strong>${largest.name}</strong> (${(largest.population / 1000).toFixed(0)}k people) ·
       Youngest: <strong>${youngest.name}</strong> (median age ${youngest.medianAge.toFixed(1)}) ·
@@ -116,7 +119,7 @@ export function render() {
       <p><a class="btn" href="#/regions">Open the interactive map →</a></p>
     </div>
     <div class="panel">
-      ${sectionHead('Method', 'Every figure, sourced and checked', 'No estimates, no placeholders, nothing behind a login.')}
+      ${sectionHead(t('ov.method.kicker'), t('ov.method.title'), t('ov.method.blurb'))}
       <p class="panel-note">Thirty indicators across six topics, each with a 2010–2024 series and a numbered official citation. A live audit on the Sources page checks the dataset for consistency — sector shares, age bands, GDP per capita, population parts — and reports every result.</p>
       <p><a class="btn btn-ghost" href="#/sources">Sources, calendar &amp; audit →</a></p>
     </div>
@@ -153,36 +156,44 @@ export function mount() {
     });
   });
 
-  // Featured chart switcher.
+  // Featured chart switcher, with a Level / YoY % unit toggle and inline
+  // event callouts on every series.
   const featured = document.getElementById('featured-chart');
   const extra = document.getElementById('featured-extra');
   let currentFeatured = null;
+  let currentChart = 'gdp';
+  let yoyMode = false;
+  const toYoY = (values) => values.slice(1).map((p, i) => ({ year: p.year, value: ((p.value / values[i].value) - 1) * 100 }));
   const draw = (id) => {
+    currentChart = id;
     extra.innerHTML = '';
+    const yoy = (list) => (yoyMode ? list.map((s) => ({ ...s, label: s.label.includes('% YoY') ? s.label : `${s.label} (% YoY)`, values: toYoY(s.values) })) : list);
     if (id === 'gdp') {
       currentFeatured = { label: 'GDP Growth', caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].', indicators: ['nominal-gdp'] };
-      renderLineChart(featured, [
+      renderLineChart(featured, yoy([
         { label: 'Nominal GDP (S$B)', color: '#0F766E', values: indicatorById('nominal-gdp').series },
-      ], { title: '', unit: 'S$B', compact: true, caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].' });
+      ]), { title: '', unit: yoyMode ? '% YoY' : 'S$B', compact: true, height: 110, caption: 'S$719.4B in 2024, up 6.8%; real growth +4.4% [2].', annotations: [{ year: 2020, text: 'COVID-19 dip −4.9%' }, { year: 2022, text: 'Rebound +16.5%' }] });
     } else if (id === 'population') {
       currentFeatured = { label: 'Population', caption: 'Total 6.04M; residents 4.18M at June 2024 [1].', indicators: ['total-population', 'resident-population'] };
-      renderLineChart(featured, [
+      renderLineChart(featured, yoy([
         { label: 'Total population (M)', color: '#0F766E', values: indicatorById('total-population').series },
         { label: 'Resident population (M)', color: '#B45309', values: indicatorById('resident-population').series },
-      ], { title: '', unit: 'M', compact: true, caption: 'Total 6.04M; residents 4.18M at June 2024 [1].' });
-      renderPyramidChart(extra, PYRAMID_2024, { title: 'Age structure, 2024 — share of total population', caption: 'Working-age residents (15–64) are 72.3% of the population; seniors 65+ are 13.6% [1].' });
+      ]), { title: '', unit: yoyMode ? '% YoY' : 'M', compact: true, height: 110, caption: 'Total 6.04M; residents 4.18M at June 2024 [1].', annotations: [{ year: 2020, text: 'Border controls −4.2%' }, { year: 2023, text: 'Rebound +5.0%' }] });
+      if (!yoyMode) {
+        renderPyramidChart(extra, PYRAMID_2024, { title: 'Age structure, 2024 — share of total population', caption: 'Working-age residents (15–64) are 72.3% of the population; seniors 65+ are 13.6% [1].' });
+      }
     } else if (id === 'inflation') {
       currentFeatured = { label: 'Core vs Headline CPI', caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].', indicators: ['cpi-headline', 'cpi-core'] };
-      renderLineChart(featured, [
+      renderLineChart(featured, yoy([
         { label: 'Headline CPI (% YoY)', color: '#BE123C', values: indicatorById('cpi-headline').series },
         { label: 'MAS core inflation (% YoY)', color: '#0F766E', values: indicatorById('cpi-core').series },
-      ], { title: '', unit: '% YoY', compact: true, caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].' });
+      ]), { title: '', unit: '% YoY', compact: true, height: 110, caption: 'Headline +2.4%, core +2.7% in 2024 [4] [5].', annotations: [{ year: 2020, text: 'Deflation −0.2%' }, { year: 2022, text: 'Peak +6.1%' }] });
     } else {
       currentFeatured = { label: 'Port TEUs', caption: 'Record 41.1M TEUs [7]; Changi 67.7M passengers [8].', indicators: ['container-throughput', 'changi-passengers'] };
-      renderLineChart(featured, [
+      renderLineChart(featured, yoy([
         { label: 'Container throughput (M TEUs)', color: '#0F766E', values: indicatorById('container-throughput').series },
         { label: 'Changi passengers (M)', color: '#B45309', values: indicatorById('changi-passengers').series },
-      ], { title: '', unit: 'million', compact: true, caption: 'Record 41.1M TEUs [7]; Changi 67.7M passengers [8].' });
+      ]), { title: '', unit: yoyMode ? '% YoY' : 'million', compact: true, height: 110, caption: 'Record 41.1M TEUs [7]; Changi 67.7M passengers [8].', annotations: [{ year: 2020, text: 'Changi −82.7%' }, { year: 2024, text: 'Record 41.1M TEUs' }] });
     }
   };
   draw('gdp');
@@ -195,6 +206,14 @@ export function mount() {
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       draw(btn.dataset.chart);
+    });
+  });
+  document.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      yoyMode = btn.dataset.unit === 'yoy';
+      draw(currentChart);
     });
   });
 

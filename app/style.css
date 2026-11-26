@@ -292,6 +292,10 @@ button.legend-item:hover { border-color: var(--jade); }
 .compare-panel { margin-bottom: 16px; }
 .compare-pickers { display: flex; align-items: end; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
 .compare-pickers label { font-size: 13px; font-weight: 600; color: var(--muted); display: grid; gap: 5px; }
+.compare-pickers select { padding: 4px 6px; font-size: 13px; }
+.compare-pickers label { font-size: 12px; }
+.compare-pickers label { gap: 3px; }
+.compare-pickers { margin-bottom: 4px; }
 .compare-pickers select, .table-controls select, .explorer-controls select {
   border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
   background: var(--surface); font-size: 14px; max-width: 100%;
@@ -300,8 +304,9 @@ button.legend-item:hover { border-color: var(--jade); }
 .compare-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .compare-row:last-child { border-bottom: 0; }
 .compare-label { font-size: 14px; font-weight: 600; }
-.compare-bar { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
-.compare-bar span { display: block; height: 12px; border-radius: 3px; background: var(--jade); min-width: 2px; }
+.compare-bar { display: flex; align-items: center; gap: 8px; margin: 1px 0; }
+.compare-bar em { font-size: 12px; }
+.compare-bar span { display: block; height: 10px; border-radius: 3px; background: var(--jade); min-width: 2px; }
 .compare-bar.b span { background: var(--amber); }
 .compare-bar em { font-style: normal; font-size: 13px; color: var(--muted); white-space: nowrap; }
 
@@ -373,6 +378,92 @@ button.legend-item:hover { border-color: var(--jade); }
   background: var(--jade-pale); border-radius: 999px; padding: 4px 12px; font-size: 13px;
 }
 
+/* ---------- V4: 8-card KPI grid, unit toggle, annotations, zones ---------- */
+.kpi-foot { flex-wrap: wrap; }
+.kpi-card.compact { padding: 8px 12px; gap: 2px; }
+.kpi-card.compact .kpi-top h3 { font-size: 13px; }
+.kpi-card.compact .kpi-value { font-size: 22px; }
+/* Compact cards show the agency stamp in the foot, so the unit·year line
+   is dropped to keep the card to one line of meta. */
+.kpi-card.compact .kpi-unit { display: none; }
+.kpi-card.compact .kpi-meta { justify-content: flex-end; }
+.kpi-stamp { font-size: 11px; font-weight: 700; color: var(--jade); white-space: nowrap; }
+.kpi-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; }
+.kpi-foot .kpi-spark { margin-top: 0; }
+.kpi-grid-compact .kpi-spark { display: none; }
+.verify-badge {
+  font-size: 11px; font-weight: 700; color: #92400e; background: #fffbeb;
+  border: 1px solid #fde68a; border-radius: 999px; padding: 1px 7px; white-space: nowrap;
+}
+html[data-theme="dark"] .verify-badge { background: #451a03; border-color: #92400e; color: #fcd34d; }
+
+/* Segmented Level / YoY % toggle in the featured panel head. */
+.seg-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex: none; }
+.seg-btn { border: 0; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 700; padding: 5px 10px; white-space: nowrap; }
+.seg-btn.active { background: var(--jade); color: #fff; }
+.featured-panel .chart-caption { margin-top: 6px; }
+
+/* Inline event callouts on trend charts. */
+.chart-annotation { font-size: 11px; font-weight: 700; fill: var(--crimson); font-family: inherit; }
+.chart-annotation-line { stroke: var(--crimson); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.55; }
+
+/* Planning-region zone tints behind the area tiles. */
+.region-zone { fill-opacity: 0.07; stroke-opacity: 0.35; stroke-width: 1.5; }
+html[data-theme="dark"] .region-zone { fill-opacity: 0.12; }
+
+/* Region → area breadcrumb in the detail card. */
+.crumb { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.crumb-sep { color: var(--faint); }
+.crumb-btn {
+  background: none; border: 0; padding: 0; color: var(--jade); font-weight: 700;
+  font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; font-family: inherit;
+}
+.crumb-btn:hover { text-decoration: underline; }
+
+/* ---------- V4: Regions two-row grid (map + detail / compare + table) ---------- */
+.regions-page .section-head { margin-bottom: 6px; }
+.regions-page .section-head h2 { font-size: 20px; margin-bottom: 4px; }
+.regions-page .section-head .section-blurb { font-size: 14px; }
+.regions-page .map-controls { margin-bottom: 8px; }
+.regions-page .kicker { margin-bottom: 4px; }
+.regions-page .map-controls .metric-btn { padding: 5px 10px; }
+.regions-grid { display: grid; grid-template-columns: 0.92fr 1fr; gap: 12px; align-items: start; }
+.regions-grid .map-panel { padding: 12px; margin-bottom: 0; }
+.regions-grid .area-detail { position: static; padding: 14px 16px; }
+.regions-grid .area-detail h3 { font-size: 20px; margin-bottom: 8px; }
+.regions-grid .detail-grid { grid-template-columns: repeat(3, 1fr); gap: 4px 12px; }
+.regions-grid .detail-grid div { padding-bottom: 2px; }
+.regions-grid .detail-grid dd { font-size: 15px; }
+.regions-grid .compare-panel { margin-bottom: 0; padding: 8px 16px; }
+.regions-grid .table-panel { padding: 12px 16px; }
+.regions-grid .table-controls select { padding: 4px 8px; }
+.regions-grid .table-controls label { gap: 3px; }
+.regions-grid .data-table { font-size: 13px; }
+.regions-grid .data-table th, .regions-grid .data-table td { padding: 7px 10px; }
+.regions-grid .compare-panel .subhead,
+.regions-grid .table-panel .subhead { margin: 0; font-size: 16px; }
+.regions-grid .compare-row { padding: 1px 0; }
+.regions-grid .compare-bar em { font-size: 12px; line-height: 1.2; }
+.regions-grid .table-controls { margin-bottom: 8px; }
+.regions-grid .table-panel .panel-note { font-size: 12px; margin-top: 8px; }
+.table-scroll-short { max-height: 120px; overflow-y: auto; }
+.data-table td.rank { font-weight: 700; color: var(--jade); }
+
+/* ---------- V4: Demography two-column layout (pyramid / trend + table) ---------- */
+.topic-demography .section-head { margin-bottom: 8px; }
+.topic-demography .section-head h2 { font-size: 24px; }
+.topic-demography .pill-row { margin-bottom: 10px; }
+.topic-demography-grid { display: grid; grid-template-columns: 1fr 1.18fr; gap: 14px; align-items: start; }
+.topic-demography-grid .chart-panel { margin-bottom: 0; }
+.topic-right-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.topic-table-panel { padding: 12px 16px; }
+.topic-table-panel .subhead { margin: 0; font-size: 17px; }
+.topic-table-panel .data-table { font-size: 12px; }
+.topic-table-panel .data-table th,
+.topic-table-panel .data-table td { padding: 4px 8px; white-space: nowrap; }
+.topic-table-panel .table-scroll { max-height: 240px; overflow-y: auto; }
+.topic-demography .panel-note { margin-top: 10px; }
+
 /* ---------- V2: command centre, geographic map, dark theme ---------- */
 .masthead { padding: 0 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
 .masthead .kicker { margin-bottom: 4px; }
@@ -387,11 +478,11 @@ button.legend-item:hover { border-color: var(--jade); }
 .cc-panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
 .cc-panel-head h2 { font-size: 17px; letter-spacing: -0.01em; }
 .cc-panel-head a { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
-.cc-head-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.cc-head-actions { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
 .btn-mini { border: 1px solid var(--border); background: var(--surface); color: var(--jade-dark); border-radius: 7px; padding: 5px 9px; font-size: 12.5px; font-weight: 700; white-space: nowrap; line-height: 1.3; }
 .btn-mini:hover { border-color: var(--jade); color: var(--ink); }
 .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.copy-note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 6px; min-height: 0; }
+.copy-note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 6px; min-height: 18px; }
 .cc-selected { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cc-selected strong { color: var(--ink); }
 .release-list.compact { font-size: 14px; }
@@ -400,7 +491,7 @@ button.legend-item:hover { border-color: var(--jade); }
 .release-list.compact strong { display: inline; }
 .release-list.compact span { display: none; }
 
-.kpi-grid-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 0; }
+.kpi-grid-compact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 0; }
 .kpi-card.compact { padding: 10px 12px; gap: 3px; }
 .kpi-card.compact .kpi-top h3 { font-size: 13px; }
 .kpi-card.compact .kpi-value { font-size: 24px; }
@@ -414,7 +505,9 @@ button.legend-item:hover { border-color: var(--jade); }
 
 .cc-chart { min-width: 0; }
 .cc-chart:empty { display: none; }
-.featured-panel .switcher { margin-bottom: 8px; }
+.featured-panel .switcher { margin-bottom: 4px; }
+.featured-panel { padding: 6px; }
+.featured-panel .chart-head { margin-bottom: 4px; }
 .featured-link { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
 .featured-link a { font-weight: 600; }
 
@@ -469,11 +562,16 @@ html[data-theme="dark"] .landmass { fill: #12312d; stroke: #2dd4bf; }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .map-layout { grid-template-columns: 1fr; }
+  /* V4: minmax(0, 1fr) so the wide 28-area table cannot force the single
+     column wider than a phone viewport — the table scrolls inside its panel. */
+  .regions-grid { grid-template-columns: minmax(0, 1fr); }
+  .topic-demography-grid { grid-template-columns: minmax(0, 1fr); }
+  .command-grid { grid-template-columns: minmax(0, 1fr); }
   .area-detail { position: static; }
   .split { grid-template-columns: 1fr; }
   .search-box input { width: 180px; }
   .footer-inner { grid-template-columns: 1fr 1fr; }
-  .command-grid { grid-template-columns: 1fr; }
+  .command-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 640px) {
@@ -494,7 +592,12 @@ html[data-theme="dark"] .landmass { fill: #12312d; stroke: #2dd4bf; }
   .hero h1 { font-size: 32px; }
   .masthead h1 { font-size: 28px; }
   .kpi-grid-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .theme-btn { order: 0; margin-left: 0; padding: 8px 10px; font-size: 12px; }
+  .theme-btn { order: 0; margin-left: 0; padding: 6px 8px; font-size: 12px; }
+  .cc-selected { white-space: normal; }
+  /* V4: keep Menu + lang + theme on the top row — hide the brand subtitle, shrink the mark. */
+  .brand-text span { display: none; }
+  .brand-mark { width: 36px; height: 36px; font-size: 16px; }
+  .menu-btn { padding: 6px 10px; font-size: 13px; }
   .hero-blurb { font-size: 16px; }
   .kpi-grid, .topic-grid { grid-template-columns: 1fr; }
   .kpi-value { font-size: 30px; }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="LionStat — Singapore in Numbers. An independent civic statistical atlas: population, economy, jobs, prices, trade and housing, with every figure sourced.">
 <title>Overview — LionStat</title>
-<script>try{document.documentElement.dataset.theme=localStorage.getItem('lionstat-theme')||'light';}catch(e){document.documentElement.dataset.theme='light';}</script>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('lionstat-theme')||'light';}catch(e){document.documentElement.dataset.theme='light';}try{document.documentElement.lang=localStorage.getItem('lionstat-lang')||'en';}catch(e){document.documentElement.lang='en';}</script>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -15,19 +15,20 @@
       <span class="brand-mark" aria-hidden="true">LS</span>
       <span class="brand-text"><strong>LionStat</strong><span>Singapore in Numbers</span></span>
     </a>
-    <button type="button" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">Menu</button>
+    <button type="button" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="site-nav" aria-label="Menu" data-i18n="menu">Menu</button>
     <nav id="site-nav" class="site-nav" aria-label="Primary">
-      <a class="nav-link" href="#/">Overview</a>
-      <a class="nav-link" href="#/topics">Topics</a>
-      <a class="nav-link" href="#/regions">Regions</a>
-      <a class="nav-link" href="#/explorer">Data Explorer</a>
-      <a class="nav-link" href="#/sources">Sources &amp; Calendar</a>
+      <a class="nav-link" href="#/" data-i18n="nav.overview">Overview</a>
+      <a class="nav-link" href="#/topics" data-i18n="nav.topics">Topics</a>
+      <a class="nav-link" href="#/regions" data-i18n="nav.regions">Regions</a>
+      <a class="nav-link" href="#/explorer" data-i18n="nav.explorer">Data Explorer</a>
+      <a class="nav-link" href="#/sources" data-i18n="nav.sources">Sources &amp; Calendar</a>
     </nav>
     <div class="search-box">
       <label class="sr-only" for="quick-search">Search indicators, topics and planning areas</label>
-      <input id="quick-search" type="search" placeholder="Search indicators, topics, areas…" autocomplete="off">
+      <input id="quick-search" type="search" placeholder="Search indicators, topics, areas…" data-i18n-ph="search.ph" autocomplete="off">
       <ul id="search-results" class="search-results" hidden></ul>
     </div>
+    <button type="button" id="lang-toggle" class="theme-btn" aria-label="Switch language / 切换语言">中文</button>
     <button type="button" id="theme-toggle" class="theme-btn" aria-pressed="false">Dark mode</button>
   </div>
 </header>
@@ -36,18 +37,18 @@
   <div class="footer-inner">
     <div>
       <p><strong>LionStat — Singapore in Numbers</strong></p>
-      <p>An independent civic statistical atlas. Not affiliated with the Singapore government or any agency named here.</p>
+      <p data-i18n="footer.note1">An independent civic statistical atlas. Not affiliated with the Singapore government or any agency named here.</p>
     </div>
     <div>
       <p><span class="vintage-badge">Latest verified figures: 2024</span></p>
-      <p>100% static · 0 external requests · Works offline</p>
+      <p data-i18n="footer.note2">100% static · 0 external requests · Works offline</p>
     </div>
     <nav aria-label="Footer">
-      <a href="#/">Overview</a>
-      <a href="#/topics">Topics</a>
-      <a href="#/regions">Regions</a>
-      <a href="#/explorer">Data Explorer</a>
-      <a href="#/sources">Sources &amp; Calendar</a>
+      <a href="#/" data-i18n="nav.overview">Overview</a>
+      <a href="#/topics" data-i18n="nav.topics">Topics</a>
+      <a href="#/regions" data-i18n="nav.regions">Regions</a>
+      <a href="#/explorer" data-i18n="nav.explorer">Data Explorer</a>
+      <a href="#/sources" data-i18n="nav.sources">Sources &amp; Calendar</a>
     </nav>
   </div>
 </footer>
